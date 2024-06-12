@@ -1,0 +1,133 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<UseWPF>true</UseWPF>
+		<LangVersion>preview</LangVersion>
+		<PlatformTarget>x64</PlatformTarget>
+		<ImplicitUsings>true</ImplicitUsings>
+		<UseWindowsForms>true</UseWindowsForms>
+		<TargetFramework>net48</TargetFramework>
+		<Configurations>Debug A21;Debug A22;Debug A23;Debug A24</Configurations>
+		<Configurations>$(Configurations);Release A21;Release A22;Release A23;Release A24</Configurations>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('Debug'))">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('Release'))">
+		<Optimize>true</Optimize>
+		<DebugType>none</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('A21'))">
+		<CADVersion>2021</CADVersion>
+		<CADTrimVersion>21</CADTrimVersion>
+		<DefineConstants>$(DefineConstants);A21</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('A22'))">
+		<CADVersion>2022</CADVersion>
+		<CADTrimVersion>22</CADTrimVersion>
+		<DefineConstants>$(DefineConstants);A22</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('A23'))">
+		<CADVersion>2023</CADVersion>
+		<CADTrimVersion>23</CADTrimVersion>
+		<DefineConstants>$(DefineConstants);A23</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="$(Configuration.Contains('A24'))">
+		<CADVersion>2024</CADVersion>
+		<CADTrimVersion>24</CADTrimVersion>
+		<DefineConstants>$(DefineConstants);A24</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Version>$(CADVersion)</Version>
+		<!--<GenerateAssemblyInfo>true</GenerateAssemblyInfo>-->
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<Description>A Project Support for developer in Autocad And Civild3D </Description>
+		<PublishSingleFile>true</PublishSingleFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="Resources\logo_16.png" />
+		<None Remove="Resources\logo_32.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Update="Properties\Settings.Designer.cs">
+			<DesignTimeSharedInput>True</DesignTimeSharedInput>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Settings.settings</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="PackageContents.xml">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\logo_16.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="Resources\logo_32.png">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Properties\Settings.settings">
+			<Generator>SettingsSingleFileGenerator</Generator>
+			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Chuongmep.Acad.Api.acmgd" Version="$(CADVersion).*">
+			<ExcludeAssets>runtime </ExcludeAssets>
+		</PackageReference>
+		<PackageReference Include="Chuongmep.Acad.Api.acdbmgd" Version="$(CADVersion).*">
+			<ExcludeAssets>runtime </ExcludeAssets>
+		</PackageReference>
+		<PackageReference Include="Chuongmep.Acad.Api.accoremgd" Version="$(CADVersion).*">
+			<ExcludeAssets>runtime </ExcludeAssets>
+		</PackageReference>
+		<PackageReference Include="Chuongmep.Acad.Api.AdWindows" Version="$(CADVersion).*">
+			<ExcludeAssets>runtime </ExcludeAssets>
+		</PackageReference>
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+		<PackageReference Include="Mono.Cecil" Version="0.11.4" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Tools\ElectricColumn\viewModels\" />
+	  <Folder Include="Tools\ElectricColumn\views\" />
+	  <Folder Include="Utils\Dimentions\" />
+	  <Folder Include="Utils\NewFolder\" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<FileExists Condition="Exists('$(SolutionDir)$(AssemblyName)\Build\postbuild.ps1')">true</FileExists>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PostBuildEvent Condition="'$(FileExists)' == 'true'">
+			powershell -NoProfile -ExecutionPolicy Unrestricted $(SolutionDir)$(AssemblyName)\Build\postbuild.ps1 -SolutionDir '$(SolutionDir)' -MSBuildProjectDirectory '$(MSBuildProjectDirectory)'
+		</PostBuildEvent>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PostBuildEvent Condition="'$(FileExists)' != 'true'">
+			powershell -NoProfile -ExecutionPolicy Unrestricted $(SolutionDir)Build\postbuild.ps1 -SolutionDir '$(SolutionDir)' -MSBuildProjectDirectory '$(MSBuildProjectDirectory)'
+		</PostBuildEvent>
+	</PropertyGroup>
+
+	<Target Name="CopyFiles" AfterTargets="CoreBuild" Condition="$(Configuration.Contains('Debug'))">
+		<ItemGroup>
+			<XmlItem Include="$(ProjectDir)*.xml" />
+			<AddinItem Include="$(TargetDir)*.*" />
+		</ItemGroup>
+		<PropertyGroup>
+			<RootDir>C:\ProgramData\Autodesk\ApplicationPlugins\$(AssemblyName).bundle\</RootDir>
+		</PropertyGroup>
+		<Message Text="Copy files to Addin folder" Importance="high" />
+		<Copy SourceFiles="@(XmlItem)" DestinationFolder="$(RootDir)" />
+		<Copy SourceFiles="@(AddinItem)" DestinationFolder="$(RootDir)$(CADTrimVersion)\%(RecursiveDir)" />
+
+	</Target>
+</Project>

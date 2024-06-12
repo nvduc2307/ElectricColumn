@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "Cad2021": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2021\\acad.exe"
+    },
+    "Cad2022": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2022\\acad.exe"
+    },
+    "Cad2023": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2023\\acad.exe"
+    },
+    "Cad2024": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\Autodesk\\AutoCAD 2024\\acad.exe"
+    }
+  }
+}
