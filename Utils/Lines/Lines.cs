@@ -66,6 +66,24 @@ namespace CadDev.Utils.Lines
             }
             return results;
         }
+
+        public static IEnumerable<Point3d> GetPoints(this IEnumerable<Line> ls)
+        {
+            var results = new List<Point3d>();
+            var ps = new List<Point3d>();
+            try
+            {
+                foreach (var l in ls)
+                {
+                    ps.AddRange(l.GetPoints());
+                }
+                results = ps.Distinct(new ComparePoints()).ToList();
+            }
+            catch (System.Exception)
+            {
+            }
+            return results;
+        }
     }
     public class LineCad
     {

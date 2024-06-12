@@ -13,6 +13,7 @@ using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using CadDev.Utils.Polylines;
 using CadDev.Utils.Selections;
+using System.Runtime.InteropServices;
 
 namespace CadDev.Tools.ElectricColumn
 {
@@ -33,7 +34,7 @@ namespace CadDev.Tools.ElectricColumn
                     using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
                     {
                         var ls = ts.SelectObjs<Line>(AC.Editor);
-                        var ps = GetPs(ls);
+                        var ps = ls.GetPoints().ToList();
                         _electricColumnService.GetControlPoints(ps, out Point3d MaxXMinY, out Point3d MinXMinY, out Point3d MaxXMaxY, out Point3d MinXMaxY);
                         _electricColumnService.GetFaceBaseElectricColumn(
                         new Point3d(),
@@ -66,7 +67,7 @@ namespace CadDev.Tools.ElectricColumn
                             out IEnumerable<LineCad> lineFaceYs, 
                             out IEnumerable<LineCad> lineFaceXs);
 
-                        var linesBody = new List<Line>();
+                        var linesBody = new List<LineCad>();
 
                         foreach (var line in lineFaceYs)
                         {
@@ -78,8 +79,8 @@ namespace CadDev.Tools.ElectricColumn
                                 var p11 = line.StartP.RayPointToFace(Vector3d.YAxis, facesElectricColumn.North1Face);
                                 var p22 = line.EndP.RayPointToFace(Vector3d.YAxis, facesElectricColumn.North1Face);
 
-                                var l1 = ts.CreateLine(AC.Database, p1, p2);
-                                var l2 = ts.CreateLine(AC.Database, p11, p22);
+                                var l1 = new LineCad(ts, AC.Database, p1, p2);
+                                var l2 = new LineCad(ts, AC.Database, p11, p22);
 
                                 linesBody.Add(l1);
                                 linesBody.Add(l2);
@@ -92,8 +93,8 @@ namespace CadDev.Tools.ElectricColumn
                                 var p11 = line.StartP.RayPointToFace(Vector3d.YAxis, facesElectricColumn.North2Face);
                                 var p22 = line.EndP.RayPointToFace(Vector3d.YAxis, facesElectricColumn.North2Face);
 
-                                var l1 = ts.CreateLine(AC.Database, p1, p2);
-                                var l2 = ts.CreateLine(AC.Database, p11, p22);
+                                var l1 = new LineCad(ts, AC.Database, p1, p2);
+                                var l2 = new LineCad(ts, AC.Database, p11, p22);
 
                                 linesBody.Add(l1);
                                 linesBody.Add(l2);
@@ -110,8 +111,8 @@ namespace CadDev.Tools.ElectricColumn
                                 var p11 = line.StartP.RayPointToFace(-Vector3d.XAxis, facesElectricColumn.West1Face);
                                 var p22 = line.EndP.RayPointToFace(-Vector3d.XAxis, facesElectricColumn.West1Face);
 
-                                var l1 = ts.CreateLine(AC.Database, p1, p2);
-                                var l2 = ts.CreateLine(AC.Database, p11, p22);
+                                var l1 = new LineCad(ts, AC.Database, p1, p2);
+                                var l2 = new LineCad(ts, AC.Database, p11, p22);
 
                                 linesBody.Add(l1);
                                 linesBody.Add(l2);
@@ -124,12 +125,18 @@ namespace CadDev.Tools.ElectricColumn
                                 var p11 = line.StartP.RayPointToFace(-Vector3d.XAxis, facesElectricColumn.West2Face);
                                 var p22 = line.EndP.RayPointToFace(-Vector3d.XAxis, facesElectricColumn.West2Face);
 
-                                var l1 = ts.CreateLine(AC.Database, p1, p2);
-                                var l2 = ts.CreateLine(AC.Database, p11, p22);
+                                var l1 = new LineCad(ts, AC.Database, p1, p2);
+                                var l2 = new LineCad(ts, AC.Database, p11, p22);
 
                                 linesBody.Add(l1);
                                 linesBody.Add(l2);
                             }
+                        }
+
+                        linesBody = linesBody.Distinct(new CompareLines()).ToList();
+                        foreach (var line in linesBody)
+                        {
+                            line.Create();
                         }
                     }
                     ts.Commit();
@@ -139,23 +146,6 @@ namespace CadDev.Tools.ElectricColumn
                     MessageBox.Show(ex.Message);
                 }
             }
-        }
-        private List<Point3d> GetPs(IEnumerable<Line> ls)
-        {
-            var results = new List<Point3d>();
-            var ps = new List<Point3d>();
-            try
-            {
-                foreach (var l in ls)
-                {
-                    ps.AddRange(l.GetPoints());
-                }
-                results = ps.Distinct(new ComparePoints()).ToList();
-            }
-            catch (System.Exception)
-            {
-            }
-            return results;
         }
     }
 }
