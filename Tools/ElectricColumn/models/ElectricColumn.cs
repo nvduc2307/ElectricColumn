@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using CadDev.Tools.ElectricColumn.viewModels;
 using CadDev.Utils;
 using CadDev.Utils.Compares;
 using CadDev.Utils.Geometries;
@@ -26,6 +27,7 @@ namespace CadDev.Tools.ElectricColumn.models
         /// </summary>
         private Transaction _ts;
         private Database _db;
+        private ElectricColumnViewModel _electricColumnViewModel;
 
         public Point3d PointBase { get; set; }
         public Point3d PointBaseInstall { get; set; }
@@ -126,8 +128,13 @@ namespace CadDev.Tools.ElectricColumn.models
                             var l1 = new LineCad(_ts, AC.Database, p1, p2);
                             var l2 = new LineCad(_ts, AC.Database, p11, p22);
 
+                            var l11 = new LineCad(_ts, AC.Database, p1, p11);
+                            var l22 = new LineCad(_ts, AC.Database, p2, p22);
+
                             LineFaceEars.Add(l1);
                             LineFaceEars.Add(l2);
+                            LineFaceEars.Add(l11);
+                            LineFaceEars.Add(l22);
                         }
                         else
                         {
@@ -140,8 +147,13 @@ namespace CadDev.Tools.ElectricColumn.models
                             var l1 = new LineCad(_ts, AC.Database, p1, p2);
                             var l2 = new LineCad(_ts, AC.Database, p11, p22);
 
+                            var l11 = new LineCad(_ts, AC.Database, p1, p11);
+                            var l22 = new LineCad(_ts, AC.Database, p2, p22);
+
                             LineFaceEars.Add(l1);
                             LineFaceEars.Add(l2);
+                            LineFaceEars.Add(l11);
+                            LineFaceEars.Add(l22);
                         }
                     }
                     break;
@@ -159,8 +171,13 @@ namespace CadDev.Tools.ElectricColumn.models
                             var l1 = new LineCad(_ts, AC.Database, p1, p2);
                             var l2 = new LineCad(_ts, AC.Database, p11, p22);
 
+                            var l11 = new LineCad(_ts, AC.Database, p1, p11);
+                            var l22 = new LineCad(_ts, AC.Database, p2, p22);
+
                             LineFaceEars.Add(l1);
                             LineFaceEars.Add(l2);
+                            LineFaceEars.Add(l11);
+                            LineFaceEars.Add(l22);
                         }
                         else
                         {
@@ -173,12 +190,18 @@ namespace CadDev.Tools.ElectricColumn.models
                             var l1 = new LineCad(_ts, AC.Database, p1, p2);
                             var l2 = new LineCad(_ts, AC.Database, p11, p22);
 
+                            var l11 = new LineCad(_ts, AC.Database, p1, p11);
+                            var l22 = new LineCad(_ts, AC.Database, p2, p22);
+
                             LineFaceEars.Add(l1);
                             LineFaceEars.Add(l2);
+                            LineFaceEars.Add(l11);
+                            LineFaceEars.Add(l22);
                         }
                     }
                     break;
             }
+            LineFaceEars = LineFaceEars.Distinct(new CompareLines()).ToList();
             foreach (var l in LineFaceEars)
             {
                 l.Create();

@@ -97,8 +97,6 @@
 	<ItemGroup>
 	  <Folder Include="Tools\ElectricColumn\iservices\" />
 	  <Folder Include="Tools\ElectricColumn\services\" />
-	  <Folder Include="Tools\ElectricColumn\viewModels\" />
-	  <Folder Include="Tools\ElectricColumn\views\" />
 	  <Folder Include="Utils\Dimentions\" />
 	  <Folder Include="Utils\NewFolder\" />
 	</ItemGroup>

@@ -2,6 +2,8 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using CadDev.Utils.Compares;
 using CadDev.Utils.Geometries;
+using CadDev.Utils.CanvasUtils;
+using CadDev.Utils.CanvasUtils.Utils;
 
 namespace CadDev.Utils.Lines
 {
@@ -89,9 +91,12 @@ namespace CadDev.Utils.Lines
     {
         private Transaction _ts;
         private Database _db;
-        public Point3d StartP { get; set; }
         public Point3d EndP { get; set; }
         public Point3d MidP { get; set; }
+        public Point3d StartP { get; set; }
+        public CanvasBase CanvasBase { get; set; }
+        public InstanceInCanvasLine CanvasLine {  get; set; }
+        public OptionStyleInstanceInCanvas OptionStyleInstanceInCanvas { get; set; }
         public LineCad(Transaction ts, Database database, Point3d p1, Point3d p2)
         {
             _ts = ts;
@@ -120,6 +125,10 @@ namespace CadDev.Utils.Lines
             {
             }
             return result;
+        }
+        public void CreateInCanvas()
+        {
+            if (CanvasLine != null) CanvasLine.DrawInCanvas();
         }
     }
 }

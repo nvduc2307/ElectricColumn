@@ -1,0 +1,46 @@
+﻿<Window x:Class="CadDev.Tools.ElectricColumn.views.ElectricColumnView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CadDev.Tools.ElectricColumn.views"
+        xmlns:ZP ="clr-namespace:CadDev.Utils.CanvasUtils.Controls"
+        mc:Ignorable="d"
+        Title="ElectricColumnView" 
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Height="620" 
+        Width="600">
+    <StackPanel Margin="15">
+        <Grid Height="500">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ZP:BorderZoomPanDrag 
+                Grid.Column="0"
+                ClipToBounds="True" 
+                Background="White" 
+                BorderBrush="#000" 
+                BorderThickness="1">
+                <Canvas Name="elevationSectionView"
+                    Background="White"/>
+            </ZP:BorderZoomPanDrag>
+            <ZP:BorderZoomPanDrag 
+                Grid.Column="1"
+                ClipToBounds="True" 
+                Background="White" 
+                BorderBrush="#000" 
+                BorderThickness="1">
+                <Canvas Name="shortSectionView"
+                    Background="White"/>
+            </ZP:BorderZoomPanDrag>
+        </Grid>
+        <StackPanel Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding Create3DCommand}" Content="Create3D" Height="30" Width="100"/>
+                <Button Content="Cancel" Margin="10,0,0,0" Height="30" Width="100"/>
+            </StackPanel> 
+        </StackPanel>
+    </StackPanel>
+</Window>
