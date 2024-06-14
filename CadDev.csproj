@@ -98,7 +98,6 @@
 	  <Folder Include="Tools\ElectricColumn\iservices\" />
 	  <Folder Include="Tools\ElectricColumn\services\" />
 	  <Folder Include="Utils\Dimentions\" />
-	  <Folder Include="Utils\NewFolder\" />
 	</ItemGroup>
 
 	<PropertyGroup>

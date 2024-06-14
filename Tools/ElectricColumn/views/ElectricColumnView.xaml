@@ -26,15 +26,21 @@
                 <Canvas Name="elevationSectionView"
                     Background="White"/>
             </ZP:BorderZoomPanDrag>
-            <ZP:BorderZoomPanDrag 
-                Grid.Column="1"
-                ClipToBounds="True" 
-                Background="White" 
-                BorderBrush="#000" 
-                BorderThickness="1">
-                <Canvas Name="shortSectionView"
-                    Background="White"/>
-            </ZP:BorderZoomPanDrag>
+            <StackPanel Grid.Column="1">
+                <ComboBox 
+                    ItemsSource="{Binding ElectricColumn.ElectricColumnShortSections}"
+                    SelectedValue="{Binding ElectricColumn.ElectricColumnShortSectionSelected}"
+                    DisplayMemberPath="Name"/>
+                <ZP:BorderZoomPanDrag 
+                    ClipToBounds="True" 
+                    Height="200"
+                    Background="White" 
+                    BorderBrush="#000" 
+                    BorderThickness="1">
+                    <Canvas Name="shortSectionView"
+                        Background="White"/>
+                </ZP:BorderZoomPanDrag>
+            </StackPanel>
         </Grid>
         <StackPanel Margin="0,10,0,0">
             <StackPanel Orientation="Horizontal">

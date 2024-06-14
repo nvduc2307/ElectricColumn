@@ -5,10 +5,11 @@ using CadDev.Utils;
 using CadDev.Utils.Compares;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CadDev.Tools.ElectricColumn.models
 {
-    public class ElectricColumn
+    public class ElectricColumn : ObservableObject
     {
         /// <summary>
         /// Mặt cắt phải được vẽ trong mặt phẳng OXY
@@ -28,6 +29,7 @@ namespace CadDev.Tools.ElectricColumn.models
         private Transaction _ts;
         private Database _db;
         private ElectricColumnViewModel _electricColumnViewModel;
+        private ElectricColumnShortSection _electricColumnShortSectionSelected;
 
         public Point3d PointBase { get; set; }
         public Point3d PointBaseInstall { get; set; }
@@ -43,6 +45,16 @@ namespace CadDev.Tools.ElectricColumn.models
         public FacesElectricColumn FacesElectricColumn { get; set; }
         public ElectricColumnFaceBase ElectricColumnFaceBase { get; set; }
         public ElectricColumnControlPoints ElectricColumnControlPoints { get; set; }
+        public List<ElectricColumnShortSection> ElectricColumnShortSections { get; set; } = new List<ElectricColumnShortSection>();
+        public ElectricColumnShortSection ElectricColumnShortSectionSelected
+        {
+            get => _electricColumnShortSectionSelected;
+            set
+            {
+                _electricColumnShortSectionSelected = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ElectricColumn(Transaction ts, Database db, IEnumerable<Line> linesNoEars, IEnumerable<Line> linesHasEars)
         {
@@ -100,17 +112,58 @@ namespace CadDev.Tools.ElectricColumn.models
             LinesEar = linesEar;
             LineFaceEarYs = lineFaceEarYs;
             LineFaceEarXs = lineFaceEarXs;
+            GetLinesEars(ElectricColumnEarDirectionType.DirX);
+            ReConfigLinesBody();
+            GetElectricColumnShortSections();
+            ElectricColumnShortSectionSelected = ElectricColumnShortSections.FirstOrDefault();
         }
 
-        public void CreateBody()
+        public void CreateElectric()
         {
             foreach (var l in LinesBody)
             {
                 l.Create();
             }
+            foreach (var l in LineFaceEars)
+            {
+                l.Create();
+            }
         }
 
-        public void CreateEars(ElectricColumnEarDirectionType earDirType)
+        private void ReConfigLinesBody()
+        {
+            var linesExisted = new List<LineCad>();
+            foreach(var l in LineFaceEars)
+            {
+                var check = LinesBody.Any(x =>
+                {
+                    var dk1 = x.Dir.IsParallelTo(l.Dir);
+                    var dk2 = l.StartP.Distance(x).IsEqual(0);
+                    return dk1 && dk2;
+                });
+                if (check) linesExisted.Add(l);
+            }
+            LinesBody = LinesBody.Where(x => !linesExisted.Any(y => y.MidP.IsSeem(x.MidP)));
+        }
+
+        private void GetElectricColumnShortSections()
+        {
+            var linesElectricColumn = LinesBody.Concat(LineFaceEars);
+            var gps = linesElectricColumn.GetPoints()
+                .OrderBy(x=>x.Z)
+                .GroupBy(x => x.Z)
+                .Select(x=>x.ToList());
+            var id = 1;
+            foreach (var gr in gps)
+            {
+                var z = gr.First().Z;
+                var lines = linesElectricColumn.Where(x => x.StartP.Z.IsEqual(z) && x.MidP.Z.IsEqual(z)).ToList();
+                ElectricColumnShortSections.Add(new ElectricColumnShortSection(id, lines, gr.Select(x=> new Utils.Points.PointCad(x)).ToList()));
+                id++;
+            }
+        }
+
+        private void GetLinesEars(ElectricColumnEarDirectionType earDirType)
         {
             switch (earDirType)
             {
@@ -202,10 +255,6 @@ namespace CadDev.Tools.ElectricColumn.models
                     break;
             }
             LineFaceEars = LineFaceEars.Distinct(new CompareLines()).ToList();
-            foreach (var l in LineFaceEars)
-            {
-                l.Create();
-            }
         }
 
         private void GetLinesEars(out List<Line> linesEar, out List<LineCad> lineFaceEarYs, out List<LineCad> lineFaceEarXs)

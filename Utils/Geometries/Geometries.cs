@@ -1,11 +1,35 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
+using CadDev.Utils.Lines;
 
 namespace CadDev.Utils.Geometries
 {
     public static class Geometries
     {
+        public static double Distance(this Point3d p, LineCad l)
+        {
+            var d = 0.0;
+            try
+            {
+                d = p.Distance(l.StartP);
+                var dir = l.Dir;
+                var vt = (l.StartP - p).GetNormal();
+                if(dir.DotProduct(vt).IsEqual(0)) return p.Distance(l.StartP);
+                if (Math.Abs(dir.DotProduct(vt)).IsEqual(1)) return 0;
+
+                var angle = dir.DotProduct(vt) > 0
+                    ? vt.AngleTo(dir)
+                    : vt.AngleTo(-dir);
+                d = Math.Sin(angle) * d;
+            }
+            catch (Exception)
+            {
+                d = 0.0;
+            }
+            return d;
+        }
+
         public static double Distance(this Point3d p)
         {
             var result = 0.0;
@@ -110,6 +134,11 @@ namespace CadDev.Utils.Geometries
             {
             }
             return result;
+        }
+
+        public static Point3d Round(this Point3d p,int n = 4)
+        {
+            return new Point3d(Math.Round(p.X, n), Math.Round(p.Y, n), Math.Round(p.Z, n));
         }
     }
 }

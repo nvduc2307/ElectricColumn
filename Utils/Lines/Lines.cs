@@ -60,8 +60,26 @@ namespace CadDev.Utils.Lines
             var results = new List<Point3d>();
             try
             {
-                results.Add(line.StartPoint);
-                results.Add(line.EndPoint);
+                results.Add(line.StartPoint.Round());
+                results.Add(line.EndPoint.Round());
+            }
+            catch (Exception)
+            {
+            }
+            return results;
+        }
+
+        public static IEnumerable<Point3d> GetPoints(this IEnumerable<LineCad> lines)
+        {
+            var results = new List<Point3d>();
+            try
+            {
+                foreach (var l in lines)
+                {
+                    results.Add(l.StartP.Round());
+                    results.Add(l.EndP.Round());
+                }
+                results = results.Distinct(new ComparePoints()).ToList();
             }
             catch (Exception)
             {
@@ -89,11 +107,12 @@ namespace CadDev.Utils.Lines
     }
     public class LineCad
     {
-        private Transaction _ts;
-        private Database _db;
+        public Transaction _ts { get; set; }
+        public Database _db { get; set; }
         public Point3d EndP { get; set; }
         public Point3d MidP { get; set; }
         public Point3d StartP { get; set; }
+        public Vector3d Dir {  get; set; }
         public CanvasBase CanvasBase { get; set; }
         public InstanceInCanvasLine CanvasLine {  get; set; }
         public OptionStyleInstanceInCanvas OptionStyleInstanceInCanvas { get; set; }
@@ -104,6 +123,7 @@ namespace CadDev.Utils.Lines
             StartP = p1;
             EndP = p2;
             MidP = p1.MidPoint(p2);
+            Dir = (p2 - p1).GetNormal();
         }
 
         public Line Create()

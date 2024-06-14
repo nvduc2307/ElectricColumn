@@ -8,13 +8,13 @@ namespace CadDev.Utils.CanvasUtils
     public class InstanceInCanvasPolygon : InstanceInCanvas
     {
         public IEnumerable<wd.Point> Points { get; set; }
-        public InstanceInCanvasPolygon(CanvasBase canvasBase, OptionStyleInstanceInCanvas options, IEnumerable<wd.Point> points) : base(canvasBase, options)
+        public InstanceInCanvasPolygon(CanvasBase canvasBase, OptionStyleInstanceInCanvas options,wd.Point centerBase, IEnumerable<wd.Point> points) : base(canvasBase, options, centerBase)
         {
             Points = points;
             var plg = new Polygon();
             foreach (wd.Point p in points)
             {
-                var pn = new wd.Point(p.X * CanvasBase.Scale, -p.Y * CanvasBase.Scale);
+                var pn = new wd.Point(p.X * CanvasBase.Scale, p.Y * CanvasBase.Scale);
                 plg.Points.Add(pn);
             }
             plg.StrokeThickness = Options.Thickness;

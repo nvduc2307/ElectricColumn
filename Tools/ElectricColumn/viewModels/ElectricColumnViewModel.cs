@@ -10,7 +10,7 @@ namespace CadDev.Tools.ElectricColumn.viewModels
 {
     public partial class ElectricColumnViewModel : ObservableObject
     {
-        private Transaction _ts;
+        public Transaction _ts;
         private Database _db;
 
         public ElectricColumnView MainView { get; set; }
@@ -31,8 +31,7 @@ namespace CadDev.Tools.ElectricColumn.viewModels
         [RelayCommand]
         public void Create3D()
         {
-            ElectricColumn.CreateBody();
-            ElectricColumn.CreateEars(ElectricColumnEarDirectionType.DirX);
+            ElectricColumn.CreateElectric();
             MainView.Close();
         }
     }

@@ -10,5 +10,6 @@ namespace CadDev.Utils.CanvasUtils
         public static swm.SolidColorBrush Color3 = new swm.SolidColorBrush() { Color = swm.Color.FromRgb(255, 255, 0) };
         public static swm.SolidColorBrush Color4 = new swm.SolidColorBrush() { Color = swm.Color.FromRgb(255, 0, 0) };
         public static swm.SolidColorBrush Color5 = new swm.SolidColorBrush() { Color = swm.Color.FromRgb(76, 117, 208) };
+        public static swm.SolidColorBrush Selected = new swm.SolidColorBrush() { Color = swm.Color.FromRgb(60, 127, 192) };
     }
 }

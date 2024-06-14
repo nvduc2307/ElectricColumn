@@ -7,7 +7,7 @@ namespace CadDev.Utils.CanvasUtils
     public class InstanceInCanvasPolyline : InstanceInCanvas
     {
         public List<wd.Point> Points { get; set; }
-        public InstanceInCanvasPolyline(CanvasBase canvasBase, OptionStyleInstanceInCanvas options, List<wd.Point> points) : base(canvasBase, options)
+        public InstanceInCanvasPolyline(CanvasBase canvasBase, OptionStyleInstanceInCanvas options, wd.Point centerBase, List<wd.Point> points) : base(canvasBase, options, centerBase)
         {
             Points = points;
             var pll = new Polyline();
