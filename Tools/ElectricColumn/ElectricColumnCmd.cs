@@ -26,6 +26,7 @@ namespace CadDev.Tools.ElectricColumn
             {
                 try
                 {
+
                     using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
                     {
                         _viewModel = new ElectricColumnViewModel(ts, AC.Database);
