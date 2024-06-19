@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using CadDev.Tools.ElectricColumnGeneral.models;
 using CadDev.Utils;
 using CadDev.Utils.Compares;
 using CadDev.Utils.Selections;
@@ -12,38 +13,29 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
         public ElectricColumnGeneralViewModel(Transaction ts)
         {
             Ts = ts;
+            Line axisMainFace = null;
+            Line axisSubFace = null;
+            var axisMainFacePic = ts.PickObject(AC.Editor, "Pick Axis MainFace");
+            var axisSubFacePic = ts.PickObject(AC.Editor, "Pick Axis SubFace");
+
+            if(axisMainFacePic != null && axisMainFacePic is Line) axisMainFace = axisMainFacePic as Line;
+            if (axisMainFace == null) throw new Exception("Axis phải là line");
+
+            if (axisSubFacePic != null && axisSubFacePic is Line) axisSubFace = axisSubFacePic as Line;
+            if (axisSubFace == null) throw new Exception("Axis phải là line");
+
             var mainFaces = ts.SelectObjs<Line>(AC.Editor);
             var sideFaces = ts.SelectObjs<Line>(AC.Editor);
-            GetMinLine(sideFaces);
-        }
-        private void GetMinLine(IEnumerable<Line> lines)
-        {
-            try
+
+            var electricColumnGeneralModel = new ElectricColumnGeneralModel(ts, AC.Database, axisMainFace, axisSubFace, mainFaces, sideFaces);
+
+            foreach(var l in electricColumnGeneralModel.LinesMainFace)
             {
-                var lys = lines.OrderBy(x => Math.Min(Math.Round(x.StartPoint.Y), Math.Round(x.EndPoint.Y)))
-                    .GroupBy(x => Math.Min(Math.Round(x.StartPoint.Y), Math.Round(x.EndPoint.Y)))
-                    .Select(x => x.ToList())
-                    .FirstOrDefault();
-                if (lys == null) return;
-                var lxs = lys
-                    .OrderBy(x => Math.Max(Math.Round(x.StartPoint.X), Math.Round(x.EndPoint.X)))
-                    .GroupBy(x => Math.Max(Math.Round(x.StartPoint.X), Math.Round(x.EndPoint.X)))
-                    .Select(x => x.ToList())
-                    .LastOrDefault();
-                if (lxs == null) return;
-                var l = lxs.FirstOrDefault();
-
-                var ls = lines.Where(x => x.StartPoint.IsSeem(l.StartPoint) || x.StartPoint.IsSeem(l.EndPoint)
-                || x.EndPoint.IsSeem(l.StartPoint) || x.EndPoint.IsSeem(l.EndPoint));
-
-                foreach (var item in ls)
-                {
-                    item.Highlight();
-                }
-
+                l.Create();
             }
-            catch (Exception)
+            foreach (var l in electricColumnGeneralModel.LinesSubFace)
             {
+                l.Create();
             }
         }
     }
