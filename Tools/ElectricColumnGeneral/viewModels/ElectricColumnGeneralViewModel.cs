@@ -16,11 +16,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
             Line axisMainFace = null;
             Line axisSubFace = null;
             var axisMainFacePic = ts.PickObject(AC.Editor, "Pick Axis MainFace");
-            var axisSubFacePic = ts.PickObject(AC.Editor, "Pick Axis SubFace");
-
             if(axisMainFacePic != null && axisMainFacePic is Line) axisMainFace = axisMainFacePic as Line;
             if (axisMainFace == null) throw new Exception("Axis phải là line");
 
+            var axisSubFacePic = ts.PickObject(AC.Editor, "Pick Axis SubFace");
             if (axisSubFacePic != null && axisSubFacePic is Line) axisSubFace = axisSubFacePic as Line;
             if (axisSubFace == null) throw new Exception("Axis phải là line");
 

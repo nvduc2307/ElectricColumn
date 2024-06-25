@@ -18,7 +18,7 @@
         </ResourceDictionary>
     </Window.Resources>
     <StackPanel Margin="15">
-        <RadioButton IsChecked="True" Content="Button" 
+        <RadioButton IsChecked="{Binding IsOption}" Content="Button" 
                      Style="{StaticResource RadioBoxNoneBorder}"/>
         <RadioButton Content="Button2" 
              Style="{StaticResource RadioBoxNoneBorder}"/>
