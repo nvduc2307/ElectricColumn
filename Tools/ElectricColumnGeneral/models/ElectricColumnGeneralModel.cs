@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using CadDev.Utils.CanvasUtils;
 using CadDev.Utils.Lines;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,8 +31,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public LineCad AxisMainFace {  get; set; }
         public LineCad AxisSubFace {  get; set; }
 
-        public List<LineCad> LinesMainFace {  get; set; }
-        public List<LineCad> LinesSubFace {  get; set; }
+        public List<LineCad> LinesMain {  get; set; }
+        public List<LineCad> LinesSub {  get; set; }
         public List<LineCad> LinesMainFaceRight { get; set; }
         public List<LineCad> LinesMainFaceLeft { get; set; }
         public List<LineCad> LinesSubFaceRight { get; set; }
@@ -43,7 +44,9 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             Line axisMainFace,
             Line axisSubFace,
             IEnumerable<Line> linesMain, 
-            IEnumerable<Line> linesSub)
+            IEnumerable<Line> linesFaceMainPerSide, 
+            IEnumerable<Line> linesSub,
+            IEnumerable<Line> linesFaceSubPerSide)
         {
             _ts = ts;
             _db = db;
@@ -54,9 +57,28 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             BasePointCurrentSubFace = GetCenterCurrent(linesMain, AxisSubFace);
             VectorMoveMainFace = BasePointInstall - BasePointCurrentMainFace;
             VectorMoveSubFace = BasePointInstall - BasePointCurrentSubFace;
-            LinesMainFace = GetLinesFace(linesMain, VectorMoveMainFace);
-            LinesSubFace = GetLinesFace(linesSub, VectorMoveSubFace, Math.PI/2);
+            LinesMain = GetLines(linesMain, VectorMoveMainFace);
+            LinesSub = GetLines(linesSub, VectorMoveSubFace, Math.PI/2);
         }
+
+        private void GetLinesFace(
+            IEnumerable<Line> lines, 
+            Line axis, 
+            Vector3d vtMove, 
+            out List<LineCad> linesFace1, 
+            out List<LineCad> linesFace2,
+            double angle = 0)
+        {
+            linesFace1 = new List<LineCad>();
+            linesFace2 = new List<LineCad>();
+
+            foreach (var l in lines)
+            {
+                var p1 = l.StartPoint;
+                var p2 = l.EndPoint;
+            }
+        }
+
         private LineCad GetAxis(Line axis)
         {
             LineCad result = null;
@@ -84,7 +106,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             return result;
         }
 
-        private List<LineCad> GetLinesFace(IEnumerable<Line> lines,Vector3d vtMove, double angle = 0)
+        private List<LineCad> GetLines(IEnumerable<Line> lines, Vector3d vtMove, double angle = 0)
         {
             var result = new List<LineCad>();
             try

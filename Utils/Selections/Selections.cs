@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using CadDev.Tools.ElectricColumnGeneral.exceptions;
 
 namespace CadDev.Utils.Selections
 {
@@ -10,6 +11,7 @@ namespace CadDev.Utils.Selections
         {
             var results = new List<Entity>();
             var selection = editor.GetSelection().Value;
+            if (selection == null) throw new ObjectNotFoundException();
             try
             {
                 foreach (SelectedObject item in selection)
@@ -22,8 +24,9 @@ namespace CadDev.Utils.Selections
                     }
                 }
             }
-            catch (Exception)
+            catch (ObjectNotFoundException ex)
             {
+                throw ex;
             }
             return results;
         }
@@ -34,6 +37,7 @@ namespace CadDev.Utils.Selections
             try
             {
                 var selection = editor.GetSelection().Value;
+                if (selection == null) throw new ObjectNotFoundException();
                 foreach (SelectedObject item in selection)
                 {
                     if (item != null)
@@ -44,8 +48,9 @@ namespace CadDev.Utils.Selections
                     }
                 }
             }
-            catch (Exception)
+            catch (ObjectNotFoundException ex)
             {
+                throw ex;
             }
             return results;
         }
@@ -101,9 +106,11 @@ namespace CadDev.Utils.Selections
                     element = ts.GetObject(selection, OpenMode.ForWrite) as Entity;
                 }
             }
-            catch (Exception)
+            catch (ObjectNotFoundException ex)
             {
+                throw ex;
             }
+            if (element == null) throw new ObjectNotFoundException();
             return element;
         }
 

@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Lines;
@@ -136,9 +137,42 @@ namespace CadDev.Utils.Geometries
             return result;
         }
 
-        public static Point3d Round(this Point3d p,int n = 4)
+        public static Point3d Round(this Point3d p, int n = 4)
         {
             return new Point3d(Math.Round(p.X, n), Math.Round(p.Y, n), Math.Round(p.Z, n));
+        }
+
+        public static Point3d PointToLine(this Point3d p, Line l)
+        {
+            var result = p;
+            try
+            {
+                var dir = l.EndPoint - l.StartPoint;
+                var d = p.Distance(l.StartPoint);
+                var vt = (l.StartPoint - p).GetNormal();
+                if (dir.DotProduct(vt).IsEqual(0)) return l.StartPoint;
+                if (Math.Abs(dir.DotProduct(vt)).IsEqual(1)) return p;
+
+                var angle = dir.DotProduct(vt) > 0
+                    ? vt.AngleTo(dir)
+                    : vt.AngleTo(-dir);
+                d = Math.Sin(angle) * d;
+            }
+            catch (Exception)
+            {
+                result = p;
+            }
+            //ddang sai
+            return result;
+        }
+
+        public static Point3d Mirror(this Point3d p, Line l)
+        {
+            return new Point3d();
+        }
+        public static Point3d Mirror(this Point3d p, Point3d pc)
+        {
+            return new Point3d(pc.X * 2 - p.X, pc.Y * 2 - p.Y, pc.Z * 2 - p.Z);
         }
     }
 }

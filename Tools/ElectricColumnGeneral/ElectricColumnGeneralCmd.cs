@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
 using CadDev.Extension.ICommand;
+using CadDev.Tools.ElectricColumnGeneral.exceptions;
 using CadDev.Tools.ElectricColumnGeneral.viewModels;
 using CadDev.Tools.ElectricColumnGeneral.views;
 using CadDev.Utils;
@@ -35,7 +36,7 @@ namespace CadDev.Tools.ElectricColumnGeneral
                         }
                         catch (System.Exception ex)
                         {
-                            IO.ShowException(ex);
+                            if (ex.Message != ObjectNotFoundException.MessageError) IO.ShowException(ex);
                         }
                     }
                 }

@@ -17,22 +17,25 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
             Line axisSubFace = null;
             var axisMainFacePic = ts.PickObject(AC.Editor, "Pick Axis MainFace");
             if(axisMainFacePic != null && axisMainFacePic is Line) axisMainFace = axisMainFacePic as Line;
-            if (axisMainFace == null) throw new Exception("Axis phải là line");
 
             var axisSubFacePic = ts.PickObject(AC.Editor, "Pick Axis SubFace");
             if (axisSubFacePic != null && axisSubFacePic is Line) axisSubFace = axisSubFacePic as Line;
-            if (axisSubFace == null) throw new Exception("Axis phải là line");
 
-            var mainFaces = ts.SelectObjs<Line>(AC.Editor);
-            var sideFaces = ts.SelectObjs<Line>(AC.Editor);
+            var linesMain = ts.SelectObjs<Line>(AC.Editor);
+            var linesFaceMainPerSide = ts.SelectObjs<Line>(AC.Editor);
+            var linesSub = ts.SelectObjs<Line>(AC.Editor);
+            var linesFaceSubPerSide = ts.SelectObjs<Line>(AC.Editor);
 
-            var electricColumnGeneralModel = new ElectricColumnGeneralModel(ts, AC.Database, axisMainFace, axisSubFace, mainFaces, sideFaces);
+            var electricColumnGeneralModel = new ElectricColumnGeneralModel(
+                ts, AC.Database, axisMainFace, axisSubFace, 
+                linesMain, linesFaceMainPerSide, 
+                linesSub, linesFaceSubPerSide);
 
-            foreach(var l in electricColumnGeneralModel.LinesMainFace)
+            foreach(var l in electricColumnGeneralModel.LinesMain)
             {
                 l.Create();
             }
-            foreach (var l in electricColumnGeneralModel.LinesSubFace)
+            foreach (var l in electricColumnGeneralModel.LinesSub)
             {
                 l.Create();
             }
