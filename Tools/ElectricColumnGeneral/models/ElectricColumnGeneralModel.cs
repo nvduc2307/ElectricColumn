@@ -5,6 +5,8 @@ using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using System.Collections.Generic;
 using System;
+using CadDev.Utils.Faces;
+using CadDev.Utils.Messages;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
@@ -34,10 +36,21 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
         public List<LineCad> LinesMain { get; set; }
         public List<LineCad> LinesSub { get; set; }
+
         public List<LineCad> LinesMainFaceRight { get; set; }
         public List<LineCad> LinesMainFaceLeft { get; set; }
         public List<LineCad> LinesSubFaceRight { get; set; }
         public List<LineCad> LinesSubFaceLeft { get; set; }
+
+        public List<FaceCad> FacesMainFaceRight { get; set; }
+        public List<FaceCad> FacesMainFaceLeft { get; set; }
+        public List<FaceCad> FacesSubFaceRight { get; set; }
+        public List<FaceCad> FacesSubFaceLeft { get; set; }
+
+        public List<LineCad> LinesSouth { get; set; }
+        public List<LineCad> LinesEarth { get; set; }
+        public List<LineCad> LinesNorth{ get; set; }
+        public List<LineCad> LinesWest { get; set; }
 
         public ElectricColumnGeneralModel(
             Transaction ts,
@@ -75,9 +88,65 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 axisSubFace,
                 VectorMoveSubFace,
                 out List<LineCad> linesFace11,
-                out List<LineCad> linesFace21, Math.PI / 2);
+                out List<LineCad> linesFace22, Math.PI / 2);
             LinesSubFaceRight = linesFace11;
-            LinesSubFaceLeft = linesFace21;
+            LinesSubFaceLeft = linesFace22;
+
+            FacesMainFaceRight = GetFaces(linesFace1, ElectricColumnFaceType.MainFace);
+            FacesMainFaceLeft = GetFaces(linesFace2, ElectricColumnFaceType.MainFace);
+            FacesSubFaceRight = GetFaces(linesFace11, ElectricColumnFaceType.SubFace);
+            FacesSubFaceLeft = GetFaces(linesFace22, ElectricColumnFaceType.SubFace);
+
+            LinesSouth = GetLinesBody(LinesMain, FacesSubFaceLeft, ElectricColumnFaceType.MainFace);
+            LinesNorth = GetLinesBody(LinesMain, FacesSubFaceRight, ElectricColumnFaceType.MainFace);
+            LinesWest = GetLinesBody(LinesSub, FacesMainFaceLeft, ElectricColumnFaceType.SubFace);
+            LinesEarth = GetLinesBody(LinesSub, FacesMainFaceRight, ElectricColumnFaceType.SubFace);
+        }
+
+        private List<LineCad> GetLinesBody(List<LineCad> lines, List<FaceCad> faces, ElectricColumnFaceType electricColumnFaceType)
+        {
+            var results = new List<LineCad>();
+            try
+            {
+                var vtRay = electricColumnFaceType == ElectricColumnFaceType.MainFace ? new Vector3d(0,1,0) : new Vector3d(1, 0, 0);
+                foreach (var f in faces)
+                {
+                    var ls = lines.Where(x=> x.StartP.Z < f.BasePoint.Z || x.EndP.Z < f.BasePoint.Z);
+                    foreach (var l in ls)
+                    {
+                        var p1 = l.StartP.RayPointToFace(vtRay, f);
+                        var p2 = l.EndP.RayPointToFace(vtRay, f);
+                        results.Add(new LineCad(_ts, _db, p1, p2));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                IO.ShowException(ex);
+            }
+            return results;
+        }
+
+        private List<FaceCad> GetFaces(List<LineCad> linesFace, ElectricColumnFaceType electricColumnFaceType)
+        {
+            var norFace = electricColumnFaceType == ElectricColumnFaceType.MainFace
+                ? new Vector3d(0,1,0)
+                : new Vector3d(1,0,0);
+            var results = new List<FaceCad>();
+            try
+            {
+                foreach (LineCad line in linesFace)
+                {
+                    var dir = line.Dir;
+                    var nor = dir.CrossProduct(norFace);
+                    results.Add(new FaceCad(nor, line.MidP));
+                }
+            }
+            catch (Exception)
+            {
+                results = new List<FaceCad>();
+            }
+            return results;
         }
 
         private void GetLinesFace(
@@ -165,5 +234,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             return result;
         }
 
+    }
+
+    public enum ElectricColumnFaceType
+    {
+        MainFace = 1,
+        SubFace = 2
     }
 }

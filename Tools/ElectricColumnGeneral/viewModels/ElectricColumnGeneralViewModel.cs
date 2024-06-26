@@ -31,11 +31,19 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
                 linesMain, linesFaceMainPerSide, 
                 linesSub, linesFaceSubPerSide);
 
-            foreach(var l in electricColumnGeneralModel.LinesMainFaceRight)
+            foreach(var l in electricColumnGeneralModel.LinesSouth)
             {
                 l.Create();
             }
-            foreach (var l in electricColumnGeneralModel.LinesMainFaceLeft)
+            foreach (var l in electricColumnGeneralModel.LinesEarth)
+            {
+                l.Create();
+            }
+            foreach (var l in electricColumnGeneralModel.LinesNorth)
+            {
+                l.Create();
+            }
+            foreach (var l in electricColumnGeneralModel.LinesWest)
             {
                 l.Create();
             }
