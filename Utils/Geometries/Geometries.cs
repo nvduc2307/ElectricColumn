@@ -147,16 +147,25 @@ namespace CadDev.Utils.Geometries
             var result = p;
             try
             {
-                var dir = l.EndPoint - l.StartPoint;
+                var dir = (l.EndPoint - l.StartPoint).GetNormal();
                 var d = p.Distance(l.StartPoint);
                 var vt = (l.StartPoint - p).GetNormal();
                 if (dir.DotProduct(vt).IsEqual(0)) return l.StartPoint;
                 if (Math.Abs(dir.DotProduct(vt)).IsEqual(1)) return p;
 
+                var normal = dir.CrossProduct(vt);
+
+                var vti = dir.CrossProduct(normal).DotProduct(vt) > 0
+                    ? dir.CrossProduct(normal).GetNormal()
+                    : -dir.CrossProduct(normal).GetNormal();
+
                 var angle = dir.DotProduct(vt) > 0
                     ? vt.AngleTo(dir)
                     : vt.AngleTo(-dir);
+
                 d = Math.Sin(angle) * d;
+
+                result = p + vti * d;
             }
             catch (Exception)
             {
@@ -168,8 +177,10 @@ namespace CadDev.Utils.Geometries
 
         public static Point3d Mirror(this Point3d p, Line l)
         {
-            return new Point3d();
+            var pm = p.PointToLine(l);
+            return p.Mirror(pm);
         }
+
         public static Point3d Mirror(this Point3d p, Point3d pc)
         {
             return new Point3d(pc.X * 2 - p.X, pc.Y * 2 - p.Y, pc.Z * 2 - p.Z);
