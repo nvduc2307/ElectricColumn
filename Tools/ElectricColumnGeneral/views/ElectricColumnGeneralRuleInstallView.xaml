@@ -8,7 +8,7 @@
         Title="Rule Install" 
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Height="130"
+        Height="150"
         Width="300">
     <Window.Resources>
         <ResourceDictionary>
@@ -18,9 +18,12 @@
         </ResourceDictionary>
     </Window.Resources>
     <StackPanel Margin="15">
-        <RadioButton IsChecked="{Binding IsOption}" Content="Button" 
+        <RadioButton IsChecked="{Binding IsOption}" 
+                     Content="Flow The Line is Selected" 
                      Style="{StaticResource RadioBoxNoneBorder}"/>
-        <RadioButton Content="Button2" 
+        <RadioButton Content="Flow The Layer" 
              Style="{StaticResource RadioBoxNoneBorder}"/>
+        <RadioButton Content="Flow The Faces Section" 
+            Style="{StaticResource RadioBoxNoneBorder}"/>
     </StackPanel>
 </Window>

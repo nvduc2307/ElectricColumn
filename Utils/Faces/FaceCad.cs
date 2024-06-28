@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
+using CadDev.Utils.Lines;
 
 namespace CadDev.Utils.Faces
 {
@@ -6,11 +7,18 @@ namespace CadDev.Utils.Faces
     {
         public Vector3d Normal { get; set; }
         public Point3d BasePoint { get; set; }
+        public LineCad BaseLine { get; set; }
 
         public FaceCad(Vector3d normal, Point3d basePoint)
         {
             Normal = normal;
             BasePoint = basePoint;
+        }
+        public FaceCad(Vector3d normal, LineCad baseLine)
+        {
+            Normal = normal;
+            BaseLine = baseLine;
+            BasePoint = baseLine.MidP;
         }
         public FaceCad(Point3d p1, Point3d p2, Point3d p3)
         {

@@ -151,7 +151,7 @@ namespace CadDev.Utils.Geometries
                 var d = p.Distance(l.StartPoint);
                 var vt = (l.StartPoint - p).GetNormal();
                 if (dir.DotProduct(vt).IsEqual(0)) return l.StartPoint;
-                if (Math.Abs(dir.DotProduct(vt)).IsEqual(1)) return p;
+                if (Math.Abs(dir.DotProduct(vt)).IsEqual(1, 0.00000001)) return p;
 
                 var normal = dir.CrossProduct(vt);
 

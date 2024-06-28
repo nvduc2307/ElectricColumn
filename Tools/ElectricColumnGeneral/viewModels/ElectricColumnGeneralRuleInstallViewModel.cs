@@ -49,5 +49,6 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
         None = 0,
         Option1 = 1,
         Option2 = 2,
+        Option3 = 2,
     }
 }

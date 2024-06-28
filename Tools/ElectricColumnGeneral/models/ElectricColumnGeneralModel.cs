@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Messages;
+using CadDev.Utils.Compares;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
@@ -111,7 +112,15 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 var vtRay = electricColumnFaceType == ElectricColumnFaceType.MainFace ? new Vector3d(0,1,0) : new Vector3d(1, 0, 0);
                 foreach (var f in faces)
                 {
-                    var ls = lines.Where(x=> x.StartP.Z < f.BasePoint.Z || x.EndP.Z < f.BasePoint.Z);
+                    var maxZF = Math.Max(f.BaseLine.StartP.Z, f.BaseLine.EndP.Z);
+                    var minZF = Math.Min(f.BaseLine.StartP.Z, f.BaseLine.EndP.Z);
+                    var ls = lines.Where(x =>
+                    {
+                        var dk1 = x.MidP.Z < maxZF && x.MidP.Z > minZF;
+                        var dk2 = x.MidP.Z.IsEqual(maxZF);
+                        var dk3 = x.MidP.Z.IsEqual(minZF);
+                        return dk1 || dk2 || dk3;
+                    });
                     foreach (var l in ls)
                     {
                         var p1 = l.StartP.RayPointToFace(vtRay, f);
@@ -124,7 +133,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             {
                 IO.ShowException(ex);
             }
-            return results;
+            return results.Distinct(new CompareLines()).ToList();
         }
 
         private List<FaceCad> GetFaces(List<LineCad> linesFace, ElectricColumnFaceType electricColumnFaceType)
@@ -139,7 +148,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 {
                     var dir = line.Dir;
                     var nor = dir.CrossProduct(norFace);
-                    results.Add(new FaceCad(nor, line.MidP));
+                    results.Add(new FaceCad(nor, line));
                 }
             }
             catch (Exception)
