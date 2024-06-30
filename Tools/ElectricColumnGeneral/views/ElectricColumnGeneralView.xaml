@@ -4,9 +4,48 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CadDev.Tools.ElectricColumnGeneral.views"
+        xmlns:ZP ="clr-namespace:CadDev.Utils.CanvasUtils.Controls"
         mc:Ignorable="d"
-        Title="ElectricColumnGeneralView" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Height="620" 
+        Width="600">
+    <StackPanel Margin="15">
+        <Grid Height="500">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ZP:BorderZoomPanDrag 
+                Grid.Column="0"
+                ClipToBounds="True" 
+                Background="White" 
+                BorderBrush="#000" 
+                BorderThickness="1">
+                <Canvas Name="elevationSectionView"
+                Background="White"/>
+            </ZP:BorderZoomPanDrag>
+            <StackPanel Grid.Column="1">
+                <ComboBox 
+                    ItemsSource="{Binding ElectricColumn.ElectricColumnShortSections}"
+                    SelectedValue="{Binding ElectricColumn.ElectricColumnShortSectionSelected}"
+                    DisplayMemberPath="Name"/>
+                <ZP:BorderZoomPanDrag 
+                    ClipToBounds="True" 
+                    Height="200"
+                    Background="White" 
+                    BorderBrush="#000" 
+                    BorderThickness="1">
+                    <Canvas Name="shortSectionView"
+                    Background="White"/>
+                </ZP:BorderZoomPanDrag>
+            </StackPanel>
+        </Grid>
+        <StackPanel Margin="0,10,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding Create3DCommand}" Content="Create3D" Height="30" Width="100"/>
+                <Button Content="Cancel" Margin="10,0,0,0" Height="30" Width="100"/>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
 </Window>

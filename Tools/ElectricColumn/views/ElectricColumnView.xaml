@@ -18,11 +18,11 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <ZP:BorderZoomPanDrag 
-                Grid.Column="0"
-                ClipToBounds="True" 
-                Background="White" 
-                BorderBrush="#000" 
-                BorderThickness="1">
+                    Grid.Column="0"
+                    ClipToBounds="True" 
+                    Background="White" 
+                    BorderBrush="#000" 
+                    BorderThickness="1">
                 <Canvas Name="elevationSectionView"
                     Background="White"/>
             </ZP:BorderZoomPanDrag>
