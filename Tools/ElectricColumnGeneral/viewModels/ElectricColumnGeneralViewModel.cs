@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using CadDev.MVVM.View;
 using CadDev.Tools.ElectricColumnGeneral.models;
 using CadDev.Tools.ElectricColumnGeneral.services;
 using CadDev.Tools.ElectricColumnGeneral.views;
@@ -10,6 +11,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
     public partial class ElectricColumnGeneralViewModel : ObservableObject
     {
         public Transaction Ts { get; }
+        public ElectricColumnGeneralView MainView { get; set; }
         public ElectricColumnService ElectricColumnService { get; }
         public ElectricColumnModel ElectricColumnModel { get; set; }
         public ElectricColumnUIElementModel UIElement { get; set; }

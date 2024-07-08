@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AutodeskProduct="CadDev" ProductType="Application" Name="CadDev" AppName="CadDev">
+<ApplicationPackage SchemaVersion="1.0" AutodeskProduct="ElectricColumn" ProductType="Application" Name="ElectricColumn" AppName="ElectricColumn">
   <Components>
-    <ComponentEntry AppName="CadDev" Version="1.0" ModuleName="./21/CadDev.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
+    <ComponentEntry AppName="ElectricColumn" Version="1.0" ModuleName="./21/ElectricColumn.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
       <Commands>
         <Command Local="Command" Global="Command" />
         <Command Local="Init_HC_Tools" Global="Init_HC_Tools" LoadOnAutoCADStartup="True" StartupCommand="True" />
@@ -10,7 +10,7 @@
     <RuntimeRequirements Platform="AutoCAD*" SeriesMin="R24.0" SeriesMax="R24.0" />
   </Components>
   <Components>
-    <ComponentEntry AppName="CadDev" Version="1.0" ModuleName="./22/CadDev.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
+    <ComponentEntry AppName="ElectricColumn" Version="1.0" ModuleName="./22/ElectricColumn.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
       <Commands>
         <Command Local="Command" Global="Command" />
         <Command Local="Init_HC_Tools" Global="Init_HC_Tools" LoadOnAutoCADStartup="True" StartupCommand="True" />
@@ -19,7 +19,7 @@
     <RuntimeRequirements Platform="AutoCAD*" SeriesMin="R24.1" SeriesMax="R24.1" />
   </Components>
   <Components>
-    <ComponentEntry AppName="CadDev" Version="1.0" ModuleName="./23/CadDev.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
+    <ComponentEntry AppName="ElectricColumn" Version="1.0" ModuleName="./23/ElectricColumn.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
       <Commands>
         <Command Local="Command" Global="Command" />
         <Command Local="Init_HC_Tools" Global="Init_HC_Tools" LoadOnAutoCADStartup="True" StartupCommand="True" />
@@ -28,7 +28,7 @@
     <RuntimeRequirements Platform="AutoCAD*" SeriesMin="R24.2" SeriesMax="R24.2" />
   </Components>
   <Components>
-    <ComponentEntry AppName="CadDev" Version="1.0" ModuleName="./24/CadDev.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
+    <ComponentEntry AppName="ElectricColumn" Version="1.0" ModuleName="./24/ElectricColumn.dll" AppDescription="Execute Assembly no need open again CAD Or Civil3D" LoadOnAutoCADStartup="True" LoadOnCommandInvocation="True" LoadOnRequest="True">
       <Commands>
         <Command Local="Command" Global="Command" />
         <Command Local="Init_HC_Tools" Global="Init_HC_Tools" LoadOnAutoCADStartup="True" StartupCommand="True" />
