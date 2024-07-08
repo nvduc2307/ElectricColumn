@@ -51,6 +51,7 @@ namespace CadDev.Tools.ElectricColumnGeneral
                                         linesMain, linesFaceMainPerSide,
                                         linesSub, linesFaceSubPerSide);
                                     _electricColumnGeneralViewModel = new ElectricColumnGeneralViewModel(ts, electricColumnGeneralModel);
+                                    _electricColumnGeneralViewModel.UIElement.MainView.ShowDialog();
                                 }
                                 ts.Commit();
                             }

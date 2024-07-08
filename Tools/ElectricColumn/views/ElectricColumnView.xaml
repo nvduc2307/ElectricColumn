@@ -23,7 +23,7 @@
                 Background="White" 
                 BorderBrush="#000" 
                 BorderThickness="1">
-                <Canvas Name="elevationSectionView"
+                <Canvas Name="SectionElevationCanvas"
                     Background="White"/>
             </ZP:BorderZoomPanDrag>
             <StackPanel Grid.Column="1">
@@ -37,7 +37,7 @@
                     Background="White" 
                     BorderBrush="#000" 
                     BorderThickness="1">
-                    <Canvas Name="shortSectionView"
+                    <Canvas Name="SectionPlaneCanvas"
                         Background="White"/>
                 </ZP:BorderZoomPanDrag>
             </StackPanel>

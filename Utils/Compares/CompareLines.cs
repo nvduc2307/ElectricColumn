@@ -17,4 +17,19 @@ namespace CadDev.Utils.Compares
             return 0;
         }
     }
+
+    public class CompareLinesOnPlane : IEqualityComparer<LineCad>
+    {
+        public bool Equals(LineCad x, LineCad y)
+        {
+            var dk1 = x.StartP.Z.IsEqual(y.StartP.Z) && x.StartP.Z.IsEqual(y.EndP.Z);
+            var dk2 = x.EndP.Z.IsEqual(y.StartP.Z) && x.EndP.Z.IsEqual(y.EndP.Z);
+            return dk1 && dk2;
+        }
+
+        public int GetHashCode(LineCad obj)
+        {
+            return 0;
+        }
+    }
 }
