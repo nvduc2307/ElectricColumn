@@ -6,10 +6,11 @@ namespace CadDev.Utils.CanvasUtils
 {
     public class InstanceInCanvasLine : InstanceInCanvas
     {
+        public object Obj { get; set; }
         public wd.Point P1 { get; set; }
         public wd.Point P2 { get; set; }
         public Action Action { get; set; }
-        public Action<object> Delete { get; set; }
+        public Action<object, object> Delete { get; set; }
         public bool IsSelected { get; set; }
 
         public InstanceInCanvasLine(CanvasBase canvasBase, OptionStyleInstanceInCanvas Options, wd.Point centerBase, wd.Point p1, wd.Point p2) : base(canvasBase, Options, centerBase)
@@ -41,7 +42,8 @@ namespace CadDev.Utils.CanvasUtils
 
         private void L_MouseRightButtonUp(object sender, wd.Input.MouseButtonEventArgs e)
         {
-            Delete?.Invoke(sender);
+            if (Obj != null)
+                Delete?.Invoke(sender, Obj);
         }
     }
 }

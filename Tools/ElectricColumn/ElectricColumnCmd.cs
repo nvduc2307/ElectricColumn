@@ -92,52 +92,59 @@ namespace CadDev.Tools.ElectricColumn
                     p1,
                     new System.Windows.Point(-1, -1),
                     "");
+                p.Obj = _viewModel;
                 p.Action += PointAction;
                 p.InitAction();
                 p.InstanceInCanvasCircel.DrawInCanvas();
             }
         }
 
-        private void PointAction()
+        private static void PointAction(object vm)
         {
-            var itemsSelected = _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.Points.Where(x => x.IsSelected);
-            var center = _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.Center.ConvertPoint();
-            var ts = _viewModel._ts;
-            if (itemsSelected.Count() == 2)
+            if (vm is ElectricColumnViewModel _viewModel)
             {
-                var canvasBase = itemsSelected.First().InstanceInCanvasCircel.CanvasBase;
-                var scale = canvasBase.Scale;
-                var options = itemsSelected.First().InstanceInCanvasCircel.Options;
-                var vt = itemsSelected.First().InstanceInCanvasCircel.VectorInit;
-                var d = itemsSelected.First().InstanceInCanvasCircel.Diameter;
-
-                var p1 = itemsSelected.First().P.ConvertPoint();
-                var p2 = itemsSelected.Last().P.ConvertPoint();
-
-                var l = new LineCad(ts, AC.Database, itemsSelected.First().P, itemsSelected.Last().P);
-                _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.LinesAdd.Add(l);
-
-                l.CanvasLine = new InstanceInCanvasLine(
-                    canvasBase, options, center,
-                    new System.Windows.Point(p1.X + vt.X * d / (2 * scale), p1.Y + vt.Y * d / (2 * scale)),
-                    new System.Windows.Point(p2.X + vt.X * d / (2 * scale), p2.Y + vt.Y * d / (2 * scale)));
-                l.CanvasLine.Delete += LinesAddDelete;
-                l.CanvasLine.DrawInCanvas();
-                foreach (var item in _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.Points)
+                var itemsSelected = _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.Points.Where(x => x.IsSelected);
+                var center = _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.Center.ConvertPoint();
+                var ts = _viewModel._ts;
+                if (itemsSelected.Count() == 2)
                 {
-                    if (item.IsSelected) item.ResetStatus();
+                    var canvasBase = itemsSelected.First().InstanceInCanvasCircel.CanvasBase;
+                    var scale = canvasBase.Scale;
+                    var options = itemsSelected.First().InstanceInCanvasCircel.Options;
+                    var vt = itemsSelected.First().InstanceInCanvasCircel.VectorInit;
+                    var d = itemsSelected.First().InstanceInCanvasCircel.Diameter;
+
+                    var p1 = itemsSelected.First().P.ConvertPoint();
+                    var p2 = itemsSelected.Last().P.ConvertPoint();
+
+                    var l = new LineCad(ts, AC.Database, itemsSelected.First().P, itemsSelected.Last().P);
+                    _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.LinesAdd.Add(l);
+
+                    l.CanvasLine = new InstanceInCanvasLine(
+                        canvasBase, options, center,
+                        new System.Windows.Point(p1.X + vt.X * d / (2 * scale), p1.Y + vt.Y * d / (2 * scale)),
+                        new System.Windows.Point(p2.X + vt.X * d / (2 * scale), p2.Y + vt.Y * d / (2 * scale)));
+                    l.CanvasLine.Delete += LinesAddDelete;
+                    l.CanvasLine.DrawInCanvas();
+                    foreach (var item in _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.Points)
+                    {
+                        if (item.IsSelected) item.ResetStatus();
+                    }
                 }
             }
         }
 
-        private void LinesAddDelete(object obj)
+        private static void LinesAddDelete(object obj, object vm)
         {
-            if (obj is System.Windows.Shapes.Line l)
+            if (obj is ElectricColumnViewModel _viewModel)
             {
-                var dm = _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.LinesAdd.Find(x => x.CanvasLine.UIElement.Uid == l.Uid);
-                if (dm != null) { _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.LinesAdd.Remove(dm); }
-                var parent = l.Parent as Canvas;
-                parent.Children.Remove(l);
+                if (obj is System.Windows.Shapes.Line l)
+                {
+                    var dm = _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.LinesAdd.Find(x => x.CanvasLine.UIElement.Uid == l.Uid);
+                    if (dm != null) { _viewModel.ElectricColumn.ElectricColumnShortSectionSelected.LinesAdd.Remove(dm); }
+                    var parent = l.Parent as Canvas;
+                    parent.Children.Remove(l);
+                }
             }
         }
     }
