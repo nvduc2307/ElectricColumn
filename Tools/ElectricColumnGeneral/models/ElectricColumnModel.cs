@@ -25,6 +25,9 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public List<LineCad> LinesNorth { get; set; }
         public List<LineCad> LinesWest { get; set; }
 
+        public List<LineCad> SectionElevationMain { get; set; }
+        public List<LineCad> SectionElevationSub { get; set; }
+
         public List<ElectricColumnSectionPlane> SectionPlanes { get; set; }
         public ElectricColumnSectionPlane SectionPlaneSelected
         {
@@ -33,7 +36,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             {
                 _sectionPlaneSelected = value;
                 OnPropertyChanged();
-                if (_viewModel.UIElement != null) ElectricColumnUIElementModel.DrawSectionPlan(_viewModel.UIElement.SectionPlaneCanvas, _viewModel);
+                if (_viewModel.UIElement != null)
+                {
+                    ElectricColumnUIElementModel.DrawSectionPlan(_viewModel.UIElement.SectionPlaneCanvas, _viewModel);
+                    ElectricColumnUIElementModel.UpdateStatusSectionSelectedAtElevation(_viewModel.UIElement.SectionPlaneCanvas, _viewModel);
+                }
             }
         }
 
@@ -46,6 +53,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             LinesEarth = viewModel.ElectricColumnGeneralModel.LinesEarth;
             LinesNorth = viewModel.ElectricColumnGeneralModel.LinesNorth;
             LinesWest = viewModel.ElectricColumnGeneralModel.LinesWest;
+            SectionElevationMain = viewModel.ElectricColumnGeneralModel.LinesMain;
+            SectionElevationSub = viewModel.ElectricColumnGeneralModel.LinesSub;
             SectionPlanes = GetSectionPlanes();
             SectionPlaneSelected = SectionPlanes.FirstOrDefault();
         }

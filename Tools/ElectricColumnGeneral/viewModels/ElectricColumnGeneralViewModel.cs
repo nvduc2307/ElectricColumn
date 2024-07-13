@@ -4,13 +4,13 @@ using CadDev.Tools.ElectricColumnGeneral.services;
 using CadDev.Tools.ElectricColumnGeneral.views;
 using CadDev.Utils;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace CadDev.Tools.ElectricColumnGeneral.viewModels
 {
     public partial class ElectricColumnGeneralViewModel : ObservableObject
     {
         public Transaction Ts { get; }
-        public ElectricColumnGeneralView MainView { get; set; }
         public ElectricColumnService ElectricColumnService { get; }
         public ElectricColumnModel ElectricColumnModel { get; set; }
         public ElectricColumnUIElementModel UIElement { get; set; }
@@ -19,10 +19,22 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
         {
             Ts = ts;
             ElectricColumnGeneralModel = electricColumnGeneralModel;
-            ElectricColumnService = new ElectricColumnService(electricColumnGeneralModel);
             ElectricColumnModel = new ElectricColumnModel(ts, AC.Database, this);
             UIElement = new ElectricColumnUIElementModel(this);
+            ElectricColumnService = new ElectricColumnService(this);
             //ElectricColumnService.CreateElectricColumn();
+        }
+
+        [RelayCommand]
+        public void Create3D()
+        {
+            ElectricColumnService?.CreateElectricColumn();
+            UIElement.MainView.Close();
+        }
+        [RelayCommand]
+        public void Cancel()
+        {
+            UIElement.MainView.Close();
         }
     }
 }

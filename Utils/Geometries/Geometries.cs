@@ -185,5 +185,22 @@ namespace CadDev.Utils.Geometries
         {
             return new Point3d(pc.X * 2 - p.X, pc.Y * 2 - p.Y, pc.Z * 2 - p.Z);
         }
+
+        public static System.Windows.Point GetCenterCanvas(this IEnumerable<System.Windows.Point> points)
+        {
+            var result = new System.Windows.Point();
+            try
+            {
+                var maxx = points.Max(x=>x.X);
+                var minx = points.Min(x=>x.X);
+                var maxy = points.Max(x=>x.Y);
+                var miny = points.Min(y=>y.Y);
+                result = new System.Windows.Point(0.5 * (maxx + minx), 0.5 * (maxy + miny));
+            }
+            catch (Exception)
+            {
+            }
+            return result;
+        }
     }
 }

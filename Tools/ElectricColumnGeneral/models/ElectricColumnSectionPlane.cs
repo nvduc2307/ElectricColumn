@@ -12,6 +12,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public string Name { get; set; }
         public List<LineCad> Lines { get; set; }
         public List<LineCad> LinesAdd { get; set; }
+        public List<LineCad> LinesAtElevation { get; set; }
         public double Elevation { get; set; }
         public List<PointCad> Points { get; set; }
         public Point3d Center { get; set; }
@@ -21,6 +22,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             Name = $"Section{id + 1}";
             Lines = lines;
             LinesAdd = new List<LineCad>();
+            LinesAtElevation = new List<LineCad>();
             Points = GetPoints();
             Elevation = GetElevation();
             Center = GetCenter();

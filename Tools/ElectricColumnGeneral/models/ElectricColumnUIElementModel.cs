@@ -3,9 +3,12 @@ using CadDev.Tools.ElectricColumnGeneral.views;
 using CadDev.Utils;
 using CadDev.Utils.CanvasUtils;
 using CadDev.Utils.CanvasUtils.Utils;
+using CadDev.Utils.Compares;
+using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using CadDev.Utils.Points;
 using System.Drawing.Printing;
+using System.Linq;
 using System.Windows.Controls;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
@@ -32,9 +35,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             {
                 var sectionElevationCanvas = MainView.FindName(_sectionElevationCanvasName) as Canvas;
                 var sectionPlaneCanvas = MainView.FindName(_sectionPlaneCanvasName) as Canvas;
-                SectionElevationCanvas = new CanvasBase(sectionElevationCanvas, 0.01);
-                SectionPlaneCanvas = new CanvasBase(sectionPlaneCanvas, 0.01);
-                ElectricColumnUIElementModel.DrawSectionPlan(SectionPlaneCanvas, _viewModel);
+                SectionElevationCanvas = new CanvasBase(sectionElevationCanvas, 0.008);
+                SectionPlaneCanvas = new CanvasBase(sectionPlaneCanvas, 0.008);
+                DrawingSectionElevation(SectionElevationCanvas, _viewModel);
+                DrawSectionPlan(SectionPlaneCanvas, _viewModel);
             }
             catch (Exception ex)
             {
@@ -42,12 +46,64 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             }
         }
 
+        public static void UpdateStatusSectionSelectedAtElevation(CanvasBase canvasBase, ElectricColumnGeneralViewModel viewModel)
+        {
+            var sections = viewModel.ElectricColumnModel.SectionPlanes;
+            var sectionIndexOf = viewModel.ElectricColumnModel.SectionPlaneSelected;
+            foreach (var section in sections) {
+                foreach (var lc in section.LinesAtElevation) {
+                    lc.CanvasLine.ResetStatus();
+                }
+            }
+
+            foreach (var lc in sectionIndexOf.LinesAtElevation)
+            {
+                lc.CanvasLine.SelectedStatus();
+            }
+        }
+
+        public static void DrawingSectionElevation(CanvasBase canvasBase, ElectricColumnGeneralViewModel viewModel)
+        {
+            var options = new OptionStyleInstanceInCanvas(
+                StyleThicknessInCanvas.Thickness_1,
+                StyleDashInCanvas.Style_Solid,
+                StyleColorInCanvas.Color4, 
+                StyleColorInCanvas.Color4);
+            canvasBase.Parent.Children.Clear();
+            var sectionElevationMain = viewModel.ElectricColumnModel.SectionElevationMain;
+            var center = sectionElevationMain.GetPoints()
+                .Select(x =>x.ConvertPointOXZToOXY()).GetCenterCanvas();
+
+            foreach (var item in sectionElevationMain)
+            {
+                item.CanvasLine = new InstanceInCanvasLine(
+                    canvasBase,
+                    options,
+                    center,
+                    item.StartP.ConvertPointOXZToOXY(),
+                    item.EndP.ConvertPointOXZToOXY());
+                item.CanvasLine.Obj = viewModel;
+                item.CanvasLine.DrawInCanvas();
+
+                if (item.StartP.Z.IsEqual(item.EndP.Z))
+                {
+                    var elevation = item.StartP.Z;
+                    var section = viewModel.ElectricColumnModel.SectionPlanes.FirstOrDefault(x=>x.Elevation.IsEqual(elevation));
+                    if (section != null) {
+                        section.LinesAtElevation.Add(item);
+                    }
+                }
+            }
+            UpdateStatusSectionSelectedAtElevation(canvasBase, viewModel);
+        }
+
         public static void DrawSectionPlan(CanvasBase canvasBase, ElectricColumnGeneralViewModel viewModel)
         {
             var options = new OptionStyleInstanceInCanvas(
                 StyleThicknessInCanvas.Thickness_1,
                 StyleDashInCanvas.Style_Solid,
-                StyleColorInCanvas.Color4, null);
+                StyleColorInCanvas.Color4, 
+                StyleColorInCanvas.Color4);
             canvasBase.Parent.Children.Clear();
             var sectionPlane = viewModel.ElectricColumnModel.SectionPlaneSelected;
             
@@ -59,6 +115,20 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                     sectionPlane.Center.ConvertPoint(), 
                     item.StartP.ConvertPoint(), 
                     item.EndP.ConvertPoint());
+                item.CanvasLine.Obj = viewModel;
+                item.CanvasLine.DrawInCanvas();
+            }
+
+            foreach (var item in sectionPlane.LinesAdd)
+            {
+                item.CanvasLine = new InstanceInCanvasLine(
+                    canvasBase,
+                    options,
+                    sectionPlane.Center.ConvertPoint(),
+                    item.StartP.ConvertPoint(),
+                    item.EndP.ConvertPoint());
+                item.CanvasLine.Obj = viewModel;
+                item.CanvasLine.Delete += LinesAddDelete;
                 item.CanvasLine.DrawInCanvas();
             }
 
@@ -67,8 +137,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 item.InstanceInCanvasCircel = new InstanceInCanvasCircel(
                     canvasBase, 
                     options, 
-                    sectionPlane.Center.ConvertPoint(), 5, 
-                    item.P.ConvertPoint(), new System.Windows.Point(-1, -1), "");
+                    sectionPlane.Center.ConvertPoint(),
+                    5, 
+                    item.P.ConvertPoint(), 
+                    new System.Windows.Point(-1, -1), "");
                 item.Obj = viewModel;
                 item.Action += PointAction;
                 item.InitAction();
@@ -100,8 +172,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
                     l.CanvasLine = new InstanceInCanvasLine(
                         canvasBase, options, center,
-                        new System.Windows.Point(p1.X + vt.X * d / (2 * scale), p1.Y + vt.Y * d / (2 * scale)),
-                        new System.Windows.Point(p2.X + vt.X * d / (2 * scale), p2.Y + vt.Y * d / (2 * scale)));
+                        p1,
+                        p2);
                     l.CanvasLine.Obj = viewModel;
                     l.CanvasLine.Delete += LinesAddDelete;
                     l.CanvasLine.DrawInCanvas();
@@ -120,8 +192,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 var sectionPlane = viewModel.ElectricColumnModel.SectionPlaneSelected;
                 if (obj is System.Windows.Shapes.Line l)
                 {
-                    var dm = sectionPlane.LinesAdd.Find(x => x.CanvasLine.UIElement.Uid == l.Uid);
-                    if (dm != null) { sectionPlane.LinesAdd.Remove(dm); }
+                    var lineAdd = sectionPlane.LinesAdd.Find(x => x.CanvasLine.UIElement.Uid == l.Uid);
+                    if (lineAdd != null) sectionPlane.LinesAdd.Remove(lineAdd);
                     var parent = l.Parent as Canvas;
                     parent.Children.Remove(l);
                 }

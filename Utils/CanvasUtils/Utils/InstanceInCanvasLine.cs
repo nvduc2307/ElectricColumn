@@ -40,6 +40,26 @@ namespace CadDev.Utils.CanvasUtils
             }
         }
 
+        public void ResetStatus()
+        {
+            if (UIElement != null)
+                if (UIElement is Line l)
+                {
+                    l.Stroke = Options.ColorBrush;
+                    l.StrokeThickness = Options.Thickness;
+                }
+        }
+
+        public void SelectedStatus()
+        {
+            if (UIElement != null)
+                if (UIElement is Line l)
+                {
+                    l.Stroke = StyleColorInCanvas.Selected;
+                    l.StrokeThickness = StyleThicknessInCanvas.Thickness_3;
+                }
+        }
+
         private void L_MouseRightButtonUp(object sender, wd.Input.MouseButtonEventArgs e)
         {
             if (Obj != null)

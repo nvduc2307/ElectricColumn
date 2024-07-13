@@ -40,11 +40,11 @@ namespace CadDev.Utils.CanvasUtils
             var vt = CanvasBase.Center.GetVector(new wd.Point(CenterBase.X * CanvasBase.Scale, CenterBase.Y * CanvasBase.Scale));
             var p = new wd.Point(Point.X * CanvasBase.Scale + VectorInit.X * Diameter / 2, Point.Y * CanvasBase.Scale + VectorInit.Y * Diameter / 2);
             p = new wd.Point(p.X - vt.X, p.Y - vt.Y);
-            Canvas.SetLeft(UIElement, p.X - Diameter / 2);
-            Canvas.SetTop(UIElement, p.Y - Diameter / 2);
+            Canvas.SetLeft(UIElement, p.X);
+            Canvas.SetTop(UIElement, p.Y);
 
-            Canvas.SetLeft(Title, p.X - Diameter / 2 + 3);
-            Canvas.SetTop(Title, p.Y - Diameter / 2 + 2);
+            Canvas.SetLeft(Title, p.X + 3);
+            Canvas.SetTop(Title, p.Y + 2);
         }
     }
 }

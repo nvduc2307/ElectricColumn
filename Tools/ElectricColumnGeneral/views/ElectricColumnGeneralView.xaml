@@ -17,35 +17,41 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <ZP:BorderZoomPanDrag 
-                Grid.Column="0"
-                ClipToBounds="True" 
-                Background="White" 
-                BorderBrush="#000" 
-                BorderThickness="1">
-                <Canvas Name="SectionElevationCanvas"
-                Background="White"/>
-            </ZP:BorderZoomPanDrag>
+            <Border Grid.Column="0"
+                    BorderBrush="#000" 
+                    BorderThickness="1">
+                <ZP:BorderZoomPanDrag 
+                    ClipToBounds="True" 
+                    Margin="1"
+                    Background="White">
+                    <Canvas Name="SectionElevationCanvas"
+                            ClipToBounds="True"
+                    Background="White"/>
+                </ZP:BorderZoomPanDrag>
+            </Border>
             <StackPanel Grid.Column="1">
                 <ComboBox 
                     ItemsSource="{Binding ElectricColumnModel.SectionPlanes}"
                     SelectedValue="{Binding ElectricColumnModel.SectionPlaneSelected}"
                     DisplayMemberPath="Name"/>
-                <ZP:BorderZoomPanDrag 
-                    ClipToBounds="True" 
-                    Height="200"
-                    Background="White" 
-                    BorderBrush="#000" 
+                <Border BorderBrush="#000" 
                     BorderThickness="1">
-                    <Canvas Name="SectionPlaneCanvas"
-                    Background="White"/>
-                </ZP:BorderZoomPanDrag>
+                    <ZP:BorderZoomPanDrag 
+                        ClipToBounds="True" 
+                        Height="200"
+                        Margin="1"
+                        Background="White">
+                        <Canvas Name="SectionPlaneCanvas"
+                            ClipToBounds="True"
+                            Background="White"/>
+                    </ZP:BorderZoomPanDrag>
+                </Border>
             </StackPanel>
         </Grid>
         <StackPanel Margin="0,10,0,0">
             <StackPanel Orientation="Horizontal">
                 <Button Command="{Binding Create3DCommand}" Content="Create3D" Height="30" Width="100"/>
-                <Button Content="Cancel" Margin="10,0,0,0" Height="30" Width="100"/>
+                <Button Command="{Binding CancelCommand}" Content="Cancel" Margin="10,0,0,0" Height="30" Width="100"/>
             </StackPanel>
         </StackPanel>
     </StackPanel>

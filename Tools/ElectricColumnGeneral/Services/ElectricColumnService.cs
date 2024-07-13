@@ -1,34 +1,44 @@
 ﻿using CadDev.Tools.ElectricColumnGeneral.iservices;
 using CadDev.Tools.ElectricColumnGeneral.models;
+using CadDev.Tools.ElectricColumnGeneral.viewModels;
 
 namespace CadDev.Tools.ElectricColumnGeneral.services
 {
     public class ElectricColumnService : IElectricColumnService
     {
-        public ElectricColumnGeneralModel ElectricColumnGeneralModel { get; set; }
+        public ElectricColumnGeneralViewModel ElectricColumnGeneralViewModel { get; set; }
 
-        public ElectricColumnService(ElectricColumnGeneralModel electricColumnGeneralModel)
+        public ElectricColumnService(ElectricColumnGeneralViewModel electricColumnGeneralViewModel)
         {
-            ElectricColumnGeneralModel = electricColumnGeneralModel;
+            ElectricColumnGeneralViewModel = electricColumnGeneralViewModel;
         }
 
         public void CreateElectricColumn()
         {
-            foreach (var l in ElectricColumnGeneralModel.LinesSouth)
+            //draw main line
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesSouth)
             {
                 l.Create();
             }
-            foreach (var l in ElectricColumnGeneralModel.LinesEarth)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesEarth)
             {
                 l.Create();
             }
-            foreach (var l in ElectricColumnGeneralModel.LinesNorth)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesNorth)
             {
                 l.Create();
             }
-            foreach (var l in ElectricColumnGeneralModel.LinesWest)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesWest)
             {
                 l.Create();
+            }
+            //draw line sub (line design on ui)
+            foreach (var item in ElectricColumnGeneralViewModel.ElectricColumnModel.SectionPlanes)
+            {
+                foreach (var l in item.LinesAdd)
+                {
+                    l.Create();
+                }
             }
         }
     }

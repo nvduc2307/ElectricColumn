@@ -112,7 +112,7 @@
 
 	<PropertyGroup>
 		<PostBuildEvent Condition="'$(FileExists)' != 'true'">
-			powershell -NoProfile -ExecutionPolicy Unrestricted $(SolutionDir)Build\postbuild.ps1 -SolutionDir '$(SolutionDir)' -MSBuildProjectDirectory '$(MSBuildProjectDirectory)'
+			<!--powershell -NoProfile -ExecutionPolicy Unrestricted $(SolutionDir)Build\postbuild.ps1 -SolutionDir '$(SolutionDir)' -MSBuildProjectDirectory '$(MSBuildProjectDirectory)'-->
 		</PostBuildEvent>
 	</PropertyGroup>
 
