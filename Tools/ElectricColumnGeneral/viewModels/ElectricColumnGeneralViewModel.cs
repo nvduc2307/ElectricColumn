@@ -15,6 +15,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
         public ElectricColumnModel ElectricColumnModel { get; set; }
         public ElectricColumnUIElementModel UIElement { get; set; }
         public ElectricColumnGeneralModel ElectricColumnGeneralModel { get; set; }
+        public ElectricColumnSwingModel ElectricColumnSwingModel { get; set; }
         public ElectricColumnGeneralViewModel(Transaction ts, ElectricColumnGeneralModel electricColumnGeneralModel)
         {
             Ts = ts;
@@ -22,6 +23,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
             ElectricColumnModel = new ElectricColumnModel(ts, AC.Database, this);
             UIElement = new ElectricColumnUIElementModel(this);
             ElectricColumnService = new ElectricColumnService(this);
+            ElectricColumnSwingModel = new ElectricColumnSwingModel(this);
             //ElectricColumnService.CreateElectricColumn();
         }
 

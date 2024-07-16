@@ -16,30 +16,39 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
         public void CreateElectricColumn()
         {
             //draw main line
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesSouth)
+            //foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesSouth)
+            //{
+            //    l.Create();
+            //}
+            //foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesEarth)
+            //{
+            //    l.Create();
+            //}
+            //foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesNorth)
+            //{
+            //    l.Create();
+            //}
+            //foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesWest)
+            //{
+            //    l.Create();
+            //}
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnSwingModel.SwingLefts)
             {
                 l.Create();
             }
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesEarth)
-            {
-                l.Create();
-            }
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesNorth)
-            {
-                l.Create();
-            }
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesWest)
-            {
-                l.Create();
-            }
+
+            //foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnSwingModel.SwingRights)
+            //{
+            //    l.Create();
+            //}
             //draw line sub (line design on ui)
-            foreach (var item in ElectricColumnGeneralViewModel.ElectricColumnModel.SectionPlanes)
-            {
-                foreach (var l in item.LinesAdd)
-                {
-                    l.Create();
-                }
-            }
+            //foreach (var item in ElectricColumnGeneralViewModel.ElectricColumnModel.SectionPlanes)
+            //{
+            //    foreach (var l in item.LinesAdd)
+            //    {
+            //        l.Create();
+            //    }
+            //}
         }
     }
 }

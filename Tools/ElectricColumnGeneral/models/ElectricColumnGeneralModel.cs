@@ -32,6 +32,9 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public Vector3d VectorMoveMainFace { get; }
         public Vector3d VectorMoveSubFace { get; }
 
+        public Vector3d VectorBaseMain {  get; } // vtX(1, 0, 0)
+        public Vector3d VectorBaseSub {  get; }// vtX(0, 1, 0)
+
         public LineCad AxisMainFace { get; set; }
         public LineCad AxisSubFace { get; set; }
 
@@ -65,6 +68,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         {
             _ts = ts;
             _db = db;
+            VectorBaseMain = new Vector3d(1, 0, 0);
+            VectorBaseSub = new Vector3d(0, 1, 0);
             BasePointInstall = new Point3d();
             AxisMainFace = GetAxis(axisMainFace);
             AxisSubFace = GetAxis(axisSubFace);
