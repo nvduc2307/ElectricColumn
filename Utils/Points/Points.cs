@@ -21,6 +21,7 @@ namespace CadDev.Utils.Points
         {
             P = p;
         }
+
         public void InitAction()
         {
             if (InstanceInCanvasCircel != null)
@@ -51,8 +52,8 @@ namespace CadDev.Utils.Points
                     IsSelected = !IsSelected;
                     if (IsSelected)
                     {
-                        el.Stroke = StyleColorInCanvas.Color0;
-                        el.Fill = StyleColorInCanvas.Color0;
+                        el.Stroke = StyleColorInCanvas.Selected;
+                        el.Fill = StyleColorInCanvas.Selected;
                         Action?.Invoke(Obj);
                     }
                     else
