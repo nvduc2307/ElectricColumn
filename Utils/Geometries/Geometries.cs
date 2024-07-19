@@ -16,7 +16,7 @@ namespace CadDev.Utils.Geometries
                 d = p.Distance(l.StartP);
                 var dir = l.Dir;
                 var vt = (l.StartP - p).GetNormal();
-                if(dir.DotProduct(vt).IsEqual(0)) return p.Distance(l.StartP);
+                if (dir.DotProduct(vt).IsEqual(0)) return p.Distance(l.StartP);
                 if (Math.Abs(dir.DotProduct(vt)).IsEqual(1)) return 0;
 
                 var angle = dir.DotProduct(vt) > 0
@@ -72,7 +72,7 @@ namespace CadDev.Utils.Geometries
             {
                 var d = p.Distance(faceCad.BasePoint);
                 var vt = (faceCad.BasePoint - p).VectorNormal();
-                var angle = faceCad.Normal.DotProduct(vt) >= 0 
+                var angle = faceCad.Normal.DotProduct(vt) >= 0
                     ? faceCad.Normal.AngleTo(vt)
                     : faceCad.Normal.AngleTo(-vt);
                 result = Math.Cos(angle) * d;
@@ -191,10 +191,10 @@ namespace CadDev.Utils.Geometries
             var result = new System.Windows.Point();
             try
             {
-                var maxx = points.Max(x=>x.X);
-                var minx = points.Min(x=>x.X);
-                var maxy = points.Max(x=>x.Y);
-                var miny = points.Min(y=>y.Y);
+                var maxx = points.Max(x => x.X);
+                var minx = points.Min(x => x.X);
+                var maxy = points.Max(x => x.Y);
+                var miny = points.Min(y => y.Y);
                 result = new System.Windows.Point(0.5 * (maxx + minx), 0.5 * (maxy + miny));
             }
             catch (Exception)

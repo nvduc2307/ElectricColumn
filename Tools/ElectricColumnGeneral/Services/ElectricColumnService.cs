@@ -1,5 +1,4 @@
 ﻿using CadDev.Tools.ElectricColumnGeneral.iservices;
-using CadDev.Tools.ElectricColumnGeneral.models;
 using CadDev.Tools.ElectricColumnGeneral.viewModels;
 
 namespace CadDev.Tools.ElectricColumnGeneral.services
@@ -32,7 +31,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
             //{
             //    l.Create();
             //}
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnSwingModel.SwingLefts)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnSwingModel.SectionSwingRight.LastOrDefault().LineCads)
             {
                 l.Create();
             }

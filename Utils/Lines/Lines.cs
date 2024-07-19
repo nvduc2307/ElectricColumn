@@ -1,9 +1,9 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using CadDev.Utils.Compares;
-using CadDev.Utils.Geometries;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using CadDev.Utils.CanvasUtils;
 using CadDev.Utils.CanvasUtils.Utils;
+using CadDev.Utils.Compares;
+using CadDev.Utils.Geometries;
 
 namespace CadDev.Utils.Lines
 {
@@ -104,6 +104,22 @@ namespace CadDev.Utils.Lines
             }
             return results;
         }
+
+        public static bool IsContinuteLine(this LineCad l1, LineCad l2)
+        {
+            var result = false;
+            var dk1 = l1.StartP.IsSeem(l2.StartP) || l1.StartP.IsSeem(l2.StartP);
+            var dk2 = l1.EndP.IsSeem(l2.StartP) || l1.EndP.IsSeem(l2.StartP);
+            var dk3 = l1.StartP.IsSeem(l2.EndP) || l1.StartP.IsSeem(l2.EndP);
+            var dk4 = l1.EndP.IsSeem(l2.EndP) || l1.EndP.IsSeem(l2.EndP);
+            if (dk1 || dk2 || dk3 || dk4) result = true;
+            return result;
+        }
+
+        public static bool IsSeem(this LineCad l1, LineCad l2)
+        {
+            return l1.StartP.IsSeem(l2.StartP) && l1.EndP.IsSeem(l2.EndP);
+        }
     }
     public class LineCad
     {
@@ -112,9 +128,9 @@ namespace CadDev.Utils.Lines
         public Point3d EndP { get; set; }
         public Point3d MidP { get; set; }
         public Point3d StartP { get; set; }
-        public Vector3d Dir {  get; set; }
+        public Vector3d Dir { get; set; }
         public CanvasBase CanvasBase { get; set; }
-        public InstanceInCanvasLine CanvasLine {  get; set; }
+        public InstanceInCanvasLine CanvasLine { get; set; }
         public OptionStyleInstanceInCanvas OptionStyleInstanceInCanvas { get; set; }
         public LineCad(Transaction ts, Database database, Point3d p1, Point3d p2)
         {

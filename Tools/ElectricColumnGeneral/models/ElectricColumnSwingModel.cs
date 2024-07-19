@@ -2,7 +2,6 @@
 using CadDev.Utils.Compares;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
-using System.Linq;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
@@ -11,9 +10,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         private ElectricColumnGeneralViewModel _viewModel;
 
         public IEnumerable<ElectricColumnSwing> SectionSwingRight { get; set; }
+
         public IEnumerable<ElectricColumnSwing> SectionSwingLeft { get; set; }
 
         public IEnumerable<LineCad> SwingRights { get; set; }
+
         public IEnumerable<LineCad> SwingLefts { get; set; }
 
         public ElectricColumnSwingModel(ElectricColumnGeneralViewModel viewModel)
@@ -22,37 +23,44 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             GetLinesSwing(out List<LineCad> swingRights, out List<LineCad> swingLefts);
             SwingRights = swingRights;
             SwingLefts = swingLefts;
+            SectionSwingRight = GroupSwing(swingRights);
+            SectionSwingLeft = GroupSwing(swingLefts);
         }
 
-        private void GroupSwing(IEnumerable<LineCad> linesSwing)
+        private List<ElectricColumnSwing> GroupSwing(List<LineCad> linesSwing)
         {
+            linesSwing = linesSwing.OrderBy(x => x.MidP.Z).ToList();
             var results = new List<ElectricColumnSwing>();
             var c = linesSwing.Count();
-            var a = 0;
-            var lCheck = linesSwing.FirstOrDefault();
             try
             {
-                do
+                var lss = new List<List<LineCad>>();
+                var ls = new List<LineCad>();
+                for (int i = 0; i < c; i++)
                 {
-                    var re = new List<LineCad>();
-                    foreach (var item in linesSwing)
+                    var lsnew = new List<LineCad>();
+                    for (int j = i; j < c; j++)
                     {
-                        var dk1 = lCheck.StartP.IsSeem(item.StartP) || lCheck.StartP.IsSeem(item.StartP);
-                        var dk2 = lCheck.EndP.IsSeem(item.StartP) || lCheck.EndP.IsSeem(item.StartP);
-                        var dk3 = lCheck.StartP.IsSeem(item.EndP) || lCheck.StartP.IsSeem(item.EndP);
-                        var dk4 = lCheck.EndP.IsSeem(item.EndP) || lCheck.EndP.IsSeem(item.EndP);
-                        if (dk1 || dk2|| dk3|| dk4) re.Add(item);
+                        if (linesSwing[i].IsContinuteLine(linesSwing[j]))
+                            if (!ls.Any(x => x.IsSeem(linesSwing[j]))) lsnew.Add(linesSwing[j]);
                     }
-                    a = re.Count;
-                    if (a > 0)
-                    {
 
+                    if (lsnew.Count > 0)
+                    {
+                        ls.AddRange(lsnew);
                     }
-                } while (a < c);
+                    else
+                    {
+                        results.Add(new ElectricColumnSwing(ls));
+                        ls = new List<LineCad>();
+                    }
+                }
             }
             catch (Exception)
             {
             }
+
+            return results;
         }
 
         private void GetLinesSwing(out List<LineCad> swingRights, out List<LineCad> swingLefts)
@@ -70,17 +78,16 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 foreach (var face in facesRight)
                 {
                     var p = mid.RayPointToFace(vectorBase, face);
-                    if (p != null)
+                    if (p != null && p.X != double.NaN)
                     {
-                        var minz = Math.Min(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z);
-                        var maxz = Math.Max(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z);
-                        if (p.Z >= minz && p.Z <= maxz)
+                        var minz = Math.Round(Math.Min(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z), 4);
+                        var maxz = Math.Round(Math.Max(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z), 4);
+                        var dk1 = p.Z.IsGreateOrEqual(minz);
+                        var dk2 = p.Z.IsLessOrEqual(maxz);
+                        if (dk1 && dk2)
                         {
                             var vt = (mid - p).GetNormal();
-                            if (vt.DotProduct(vectorBase) > 0.0001)
-                            {
-                                swingRights.Add(line);
-                            }
+                            if (vt.DotProduct(vectorBase).IsGreate(0)) swingRights.Add(line);
                         }
                     }
                 }
@@ -88,17 +95,16 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 foreach (var face in facesLeft)
                 {
                     var p = mid.RayPointToFace(vectorBase, face);
-                    if (p != null)
+                    if (p != null && p.X != double.NaN)
                     {
-                        var minz = Math.Min(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z);
-                        var maxz = Math.Max(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z);
-                        if (p.Z >= minz && p.Z <= maxz)
+                        var minz = Math.Round(Math.Min(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z), 4);
+                        var maxz = Math.Round(Math.Max(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z), 4);
+                        var dk1 = p.Z.IsGreateOrEqual(minz);
+                        var dk2 = p.Z.IsLessOrEqual(maxz);
+                        if (dk1 && dk2)
                         {
                             var vt = (mid - p).GetNormal();
-                            if (vt.DotProduct(vectorBase) < -0.0001)
-                            {
-                                swingLefts.Add(line);
-                            }
+                            if (vt.DotProduct(vectorBase).IsLess(0)) swingLefts.Add(line);
                         }
                     }
                 }
