@@ -56,6 +56,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public List<LineCad> LinesNorth{ get; set; }
         public List<LineCad> LinesWest { get; set; }
 
+        public ElectricColumnSwingModel ElectricColumnSwingModel { get; set; }
+
         public ElectricColumnGeneralModel(
             Transaction ts,
             Database db,
@@ -102,9 +104,15 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             FacesMainFaceLeft = GetFaces(linesFace2, ElectricColumnFaceType.MainFace);
             FacesSubFaceRight = GetFaces(linesFace11, ElectricColumnFaceType.SubFace);
             FacesSubFaceLeft = GetFaces(linesFace22, ElectricColumnFaceType.SubFace);
+            
+            ElectricColumnSwingModel = new ElectricColumnSwingModel(this);
+            var swings = ElectricColumnSwingModel.SwingRights.Concat(ElectricColumnSwingModel.SwingLefts);
+            var linesBodyMain = LinesMain
+                .Where(x => !swings.Any(y=>y.IsSeem(x)))
+                .ToList();
 
-            LinesSouth = GetLinesBody(LinesMain, FacesSubFaceLeft, ElectricColumnFaceType.MainFace);
-            LinesNorth = GetLinesBody(LinesMain, FacesSubFaceRight, ElectricColumnFaceType.MainFace);
+            LinesSouth = GetLinesBody(linesBodyMain, FacesSubFaceLeft, ElectricColumnFaceType.MainFace);
+            LinesNorth = GetLinesBody(linesBodyMain, FacesSubFaceRight, ElectricColumnFaceType.MainFace);
             LinesWest = GetLinesBody(LinesSub, FacesMainFaceLeft, ElectricColumnFaceType.SubFace);
             LinesEarth = GetLinesBody(LinesSub, FacesMainFaceRight, ElectricColumnFaceType.SubFace);
         }

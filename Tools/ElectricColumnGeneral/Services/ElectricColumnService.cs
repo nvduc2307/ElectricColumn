@@ -31,10 +31,6 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
             //{
             //    l.Create();
             //}
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnSwingModel.SectionSwingRight.LastOrDefault().LineCads)
-            {
-                l.Create();
-            }
 
             //foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnSwingModel.SwingRights)
             //{

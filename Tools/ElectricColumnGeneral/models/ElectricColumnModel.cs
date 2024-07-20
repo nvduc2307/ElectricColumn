@@ -1,6 +1,8 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using CadDev.Tools.ElectricColumnGeneral.viewModels;
 using CadDev.Utils.Compares;
+using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -69,7 +71,15 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             allLines.AddRange(LinesWest);
             try
             {
+                var dms = allLines
+                    .Where(x => Math.Round(x.Dir.Distance(), 0) > 0)
+                    .Where(x=>x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
+                    .GroupBy(x => x, new CompareLinesOnPlane())
+                    .OrderBy(x => Math.Round(x.First().MidP.Z, 2));
+
                 result = allLines
+                    .Where(x=>Math.Round(x.Dir.Distance(), 0) > 0)
+                    .Where(x=>x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
                     .GroupBy(x => x, new CompareLinesOnPlane())
                     .Where(x=>x.Count() >= 2)
                     .OrderBy(x=>x.First().MidP.Z)

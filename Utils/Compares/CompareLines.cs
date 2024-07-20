@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using CadDev.Utils.Lines;
 
 namespace CadDev.Utils.Compares
@@ -24,7 +25,7 @@ namespace CadDev.Utils.Compares
         {
             var dk1 = x.StartP.Z.IsEqual(y.StartP.Z) && x.StartP.Z.IsEqual(y.EndP.Z);
             var dk2 = x.EndP.Z.IsEqual(y.StartP.Z) && x.EndP.Z.IsEqual(y.EndP.Z);
-            return dk1 && dk2;
+            return  dk1 && dk2;
         }
 
         public int GetHashCode(LineCad obj)
