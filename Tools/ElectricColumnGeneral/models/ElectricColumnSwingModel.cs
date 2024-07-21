@@ -1,12 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using CadDev.Tools.ElectricColumnGeneral.viewModels;
 using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using CadDev.Utils.Messages;
 using CadDev.Utils.Points;
+using System;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
@@ -39,7 +39,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         }
 
         private List<ElectricColumnSwing> GroupSwing(
-            List<LineCad> linesSwing, 
+            List<LineCad> linesSwing,
             ElectricColumnSwingType electricColumnSwingType)
         {
             var linesSwingNew = linesSwing.Concat(new List<LineCad>()).ToList();
@@ -69,9 +69,9 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                                 run = 1;
 
                         } while (run == 0);
-                        if (family.Count > 0) 
+                        if (family.Count > 0)
                             results.Add(new ElectricColumnSwing(
-                                _electricColumnGeneralModel, 
+                                _electricColumnGeneralModel,
                                 family.Distinct(new CompareLines()),
                                 electricColumnSwingType));
                     }
@@ -174,9 +174,12 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public IEnumerable<PointCad> PointsSectionOnPlane { get; set; }
         public IEnumerable<PointCad> PointsSectionOnSlope { get; set; }
         public Vector3d Direction { get; set; }
+        public Vector3d Normal { get; set; }
         public ElectricColumnSwingType ElectricColumnSwingType { get; set; }
-        public FaceCad FaceSwingUp {  get; set; } 
-        public FaceCad FaceSwingDown {  get; set; } 
+        public FaceCad FaceSwingUp { get; set; }
+        public FaceCad FaceSwingDown { get; set; }
+        public FaceCad FaceSwingRight { get; set; }
+        public FaceCad FaceSwingLeft { get; set; }
         public ElectricColumnSwing(ElectricColumnGeneralModel electricColumnGeneralModel,
             IEnumerable<LineCad> linesSection,
             ElectricColumnSwingType electricColumnSwingType)
@@ -186,16 +189,93 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             _db = _electricColumnGeneralModel._db;
             LinesSection = linesSection;
             ElectricColumnSwingType = electricColumnSwingType;
-            Direction = electricColumnSwingType == ElectricColumnSwingType.Right 
-                ?_electricColumnGeneralModel.VectorBaseMain
+            Direction = electricColumnSwingType == ElectricColumnSwingType.Right
+                ? _electricColumnGeneralModel.VectorBaseMain
                 : -_electricColumnGeneralModel.VectorBaseMain;
-            PointsSection = LinesSection.GetPoints().Select(x=> new PointCad(x));
+            Normal = _electricColumnGeneralModel.VectorBaseSub;
+            PointsSection = LinesSection.GetPoints().Select(x => new PointCad(x));
             PointsSectionOnPlane = GetPointsSectionOnPlane();
+            GetFaceSwingUpDown(out FaceCad faceSwingUp, out FaceCad faceSwingDown);
+            FaceSwingUp = faceSwingUp;
+            FaceSwingDown = faceSwingDown;
+            GetFaceSwingRightLeft(out FaceCad faceSwingRight, out FaceCad faceSwingLeft);
+            FaceSwingRight = faceSwingRight;
+            FaceSwingLeft = faceSwingLeft;
         }
-        public IEnumerable<PointCad> GetPointsSectionOnSlope ()
+
+        public void GetFaceSwingRightLeft(out FaceCad faceSwingRight, out FaceCad faceSwingLeft)
+        {
+            faceSwingRight = null;
+            faceSwingLeft = null;
+            try
+            {
+                var pointsSectionNew = PointsSection.ToList()
+                    .GroupBy(x => (x.P - new Point3d()).DotProduct(Direction))
+                    .Select(x => x.ToList())
+                    .OrderBy(x => (x.First().P - new Point3d()).DotProduct(Direction))
+                    .ToList();
+                var p1 = pointsSectionNew
+                    .Where(x => x.Count == 1)
+                    .OrderBy(x => (x.First().P - new Point3d()).DotProduct(Direction))
+                    .LastOrDefault().First();
+                var dms = pointsSectionNew
+                    .Where(x => x.Count > 1)
+                    .OrderBy(x => (x.First().P - new Point3d()).DotProduct(Direction))
+                    .FirstOrDefault()
+                    .OrderBy(x => x.P.Z);
+                var p2 = dms.First();
+                var p3 = dms.Last();
+
+                var p3R = PointOnFace(p3.P, _electricColumnGeneralModel.FacesSubFaceRight, Normal);
+                var p3L = PointOnFace(p3.P, _electricColumnGeneralModel.FacesSubFaceLeft, Normal);
+
+                var lR = new LineCad(_ts, _db, p3R, p1.P);
+                var lL = new LineCad(_ts, _db, p3L, p1.P);
+                faceSwingRight = new FaceCad(lR.Dir.CrossProduct(Vector3d.ZAxis), lR);
+                faceSwingLeft = new FaceCad(lL.Dir.CrossProduct(Vector3d.ZAxis), lL);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        public void GetFaceSwingUpDown(out FaceCad faceSwingUp, out FaceCad faceSwingDown)
+        {
+            faceSwingUp = null;
+            faceSwingDown = null;
+            try
+            {
+                var pointsSectionNew = PointsSection.ToList()
+                    .GroupBy(x => (x.P - new Point3d()).DotProduct(Direction))
+                    .Select(x => x.ToList())
+                    .OrderBy(x => (x.First().P - new Point3d()).DotProduct(Direction))
+                    .ToList();
+                var p1 = pointsSectionNew
+                    .Where(x => x.Count == 1)
+                    .OrderBy(x => (x.First().P - new Point3d()).DotProduct(Direction))
+                    .LastOrDefault().First();
+                var dms = pointsSectionNew
+                    .Where(x=>x.Count > 1)
+                    .OrderBy(x => (x.First().P - new Point3d()).DotProduct(Direction))
+                    .FirstOrDefault()
+                    .OrderBy(x => x.P.Z);
+                var p2 = dms.First();
+                var p3 = dms.Last();
+                var l1 = new LineCad(_ts, _db, p2.P, p1.P);
+                var l2 = new LineCad(_ts, _db, p3.P, p1.P);
+                faceSwingUp = new FaceCad(Normal.CrossProduct(l2.Dir), l2);
+                faceSwingDown = new FaceCad(Normal.CrossProduct(l1.Dir), l1);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        public IEnumerable<PointCad> GetPointsSectionOnSlope()
         {
             var results = new List<PointCad>();
-            foreach (var p in PointsSection) { 
+            foreach (var p in PointsSection)
+            {
                 try
                 {
                     if (!PointsSectionOnPlane.Any(x => x.P.IsSeem(p.P))) results.Add(p);
@@ -205,8 +285,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 }
             }
             results.Add(PointsSectionOnPlane.LastOrDefault());
-            return results.Where(x=>x !=null)
-                .OrderBy(x=>(x.P - new Point3d()).DotProduct(Direction));
+            return results.Where(x => x != null)
+                .OrderBy(x => (x.P - new Point3d()).DotProduct(Direction));
         }
         public IEnumerable<PointCad> GetPointsSectionOnPlane()
         {
@@ -217,7 +297,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 .GroupBy(x => x.P.Z)
                 .OrderBy(x => x.Count())
                 .LastOrDefault()
-                .OrderBy(x=>(x.P - new Point3d()).DotProduct(Direction))
+                .OrderBy(x => (x.P - new Point3d()).DotProduct(Direction))
                 .ToList();
             }
             catch (Exception)
@@ -256,10 +336,34 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             }
             return results.Distinct(new CompareLines()).ToList();
         }
+
+        private Point3d PointOnFace(Point3d p, List<FaceCad> faces, Vector3d vt)
+        {
+            Point3d result = new Point3d();
+            try
+            {
+                foreach (var f in faces)
+                {
+                    var maxZF = Math.Max(f.BaseLine.StartP.Z, f.BaseLine.EndP.Z);
+                    var minZF = Math.Min(f.BaseLine.StartP.Z, f.BaseLine.EndP.Z);
+
+                    var dk1 = p.Z < maxZF && p.Z > minZF;
+                    var dk2 = p.Z.IsEqual(maxZF);
+                    var dk3 = p.Z.IsEqual(minZF);
+
+                    if (dk1 || dk2 || dk3) result = p.RayPointToFace(vt, f);
+                }
+            }
+            catch (Exception ex)
+            {
+                IO.ShowException(ex);
+            }
+            return result;
+        }
     }
     public enum ElectricColumnSwingType
     {
-        Right = 1, 
+        Right = 1,
         Left = 2,
     }
 }
