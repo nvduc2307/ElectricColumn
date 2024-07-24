@@ -1,9 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using CadDev.Tools.ElectricColumnGeneral.models;
 using CadDev.Utils.CanvasUtils;
 using CadDev.Utils.CanvasUtils.Utils;
 using CadDev.Utils.Compares;
+using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
+using CadDev.Utils.Messages;
+using System.Security.Cryptography;
 
 namespace CadDev.Utils.Lines
 {
@@ -119,6 +123,25 @@ namespace CadDev.Utils.Lines
         public static bool IsSeem(this LineCad l1, LineCad l2)
         {
             return l1.StartP.IsSeem(l2.StartP) && l1.EndP.IsSeem(l2.EndP);
+        }
+
+        public static List<LineCad> LinesOnFace(this List<LineCad> lines, FaceCad faceCad)
+        {
+            var results = new List<LineCad>();
+            foreach (var l in lines)
+            {
+                try
+                {
+                    var p1 = l.StartP.RayPointToFace(faceCad.Normal, faceCad);
+                    var p2 = l.EndP.RayPointToFace(faceCad.Normal, faceCad);
+                    var lc = new LineCad(l._ts, l._db, p1, p2);
+                    results.Add(lc);
+                }
+                catch (Exception)
+                {
+                }
+            }
+            return results;
         }
     }
     public class LineCad
