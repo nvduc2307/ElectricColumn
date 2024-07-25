@@ -32,14 +32,30 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
                 l.Create();
             }
 
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.SwingLefts)
+            foreach (var electricColumnSwingsLeft in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingsLeft)
             {
-                l.Create();
+                foreach (var l in electricColumnSwingsLeft.LinesRight)
+                {
+                    l.Create();
+                }
+                foreach (var l in electricColumnSwingsLeft.LinesLeft)
+                {
+                    l.Create();
+                }
             }
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.SwingRights)
+
+            foreach (var electricColumnSwingsRight in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingsRight)
             {
-                l.Create();
+                foreach (var l in electricColumnSwingsRight.LinesLeft)
+                {
+                    l.Create();
+                }
+                foreach (var l in electricColumnSwingsRight.LinesRight)
+                {
+                    l.Create();
+                }
             }
+
 
             //foreach (var sectionSwingRight in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.SectionSwingRight)
             //{

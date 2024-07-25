@@ -4,9 +4,6 @@ using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
-using CadDev.Utils.Messages;
-using CadDev.Utils.Points;
-using System;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
@@ -174,8 +171,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public Vector3d Direction { get; set; }
         public FaceCad FaceSwingLeft { get; set; }
         public FaceCad FaceSwingRight { get; set; }
-        public List<LineCad> LinesLeft {  get; set; } 
-        public List<LineCad> LinesRight {  get; set; } 
+        public List<LineCad> LinesLeft { get; set; }
+        public List<LineCad> LinesRight { get; set; }
         public IEnumerable<LineCad> LinesSection { get; set; }
         public IEnumerable<FaceCad> FacesSubRight { get; set; }
         public IEnumerable<FaceCad> FacesSubLeft { get; set; }
@@ -197,6 +194,82 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 ? Vector3d.XAxis
                 : -Vector3d.XAxis;
             Normal = Vector3d.YAxis;
+            GetFaceSwingRightLeft(out FaceCad faceSwingRight, out FaceCad faceSwingLeft);
+            FaceSwingLeft = faceSwingLeft;
+            FaceSwingRight = faceSwingRight;
+
+            LinesRight = LinesSection.ToList().LinesOnFace(faceSwingRight, Normal);
+            LinesLeft = LinesSection.ToList().LinesOnFace(faceSwingLeft, Normal);
+        }
+
+        private void GetFaceSwingRightLeft(out FaceCad faceSwingRight, out FaceCad faceSwingLeft)
+        {
+            faceSwingRight = null;
+            faceSwingLeft = null;
+            try
+            {
+                var points = LinesSection.GetPoints();
+                var pointsGrZ = points.GroupBy(x => x.Z).OrderBy(x => x.FirstOrDefault().Z);
+                var pointsGrZMax = pointsGrZ.LastOrDefault();
+                var pointsGrZMin = pointsGrZ.FirstOrDefault();
+                var pointsGrX = points.GroupBy(x => (x - new Point3d()).DotProduct(Direction))
+                    .OrderBy(x => (x.FirstOrDefault() - new Point3d()).DotProduct(Direction));
+                var pointsGrMaxX = pointsGrX.LastOrDefault();
+                var pointsGrMinX = pointsGrX.FirstOrDefault();
+
+                //điểm mũi của cánh
+                var pMaxX = pointsGrMaxX.FirstOrDefault();
+                //điểm chân cánh phía trên
+                var pMinXTop = pointsGrZMax
+                    .GroupBy(x => (x - new Point3d()).DotProduct(Direction))
+                    .OrderBy(x => (x.FirstOrDefault() - new Point3d()).DotProduct(Direction))
+                    .FirstOrDefault()
+                    .FirstOrDefault();
+                //điểm chân cánh phía dưới
+                var pMinXBot = pointsGrZMin
+                    .GroupBy(x => (x - new Point3d()).DotProduct(Direction))
+                    .OrderBy(x => (x.FirstOrDefault() - new Point3d()).DotProduct(Direction))
+                    .FirstOrDefault()
+                    .FirstOrDefault();
+
+                var pMinXMid = pMinXTop.MidPoint(pMinXBot);
+                var faceSubRightAction = FacesSubRight.FirstOrDefault(x =>
+                {
+                    var lb = x.BaseLine;
+                    var p1 = lb.StartP;
+                    var p2 = lb.EndP;
+                    var zMax = Math.Max(p1.Z, p2.Z);
+                    var zMin = Math.Min(p1.Z, p2.Z);
+                    return zMin <= pMinXMid.Z && pMinXMid.Z <= zMax;
+                });
+
+                var faceSubLeftAction = FacesSubLeft.FirstOrDefault(x =>
+                {
+                    var lb = x.BaseLine;
+                    var p1 = lb.StartP;
+                    var p2 = lb.EndP;
+                    var zMax = Math.Max(p1.Z, p2.Z);
+                    var zMin = Math.Min(p1.Z, p2.Z);
+                    return zMin <= pMinXMid.Z && pMinXMid.Z <= zMax;
+                });
+
+                var pMinXBotRight = pMinXBot.RayPointToFace(Normal, faceSubRightAction);
+                var pMinXBotLeft = pMinXBot.RayPointToFace(Normal, faceSubLeftAction);
+
+                var pMinXTopRight = pMinXTop.RayPointToFace(Normal, faceSubRightAction);
+                var pMinXTopLeft = pMinXTop.RayPointToFace(Normal, faceSubLeftAction);
+
+                var lBotRight = new LineCad(_ts, _db, pMinXBotRight, pMaxX);
+                var lBotLeft = new LineCad(_ts, _db, pMinXBotLeft, pMaxX);
+                var lTopRight = new LineCad(_ts, _db, pMinXTopRight, pMaxX);
+                var lTopLeft = new LineCad(_ts, _db, pMinXTopLeft, pMaxX);
+
+                faceSwingRight = new FaceCad(pMaxX, pMinXTopRight, pMinXBotRight);
+                faceSwingLeft = new FaceCad(pMaxX, pMinXTopLeft, pMinXBotLeft);
+            }
+            catch (Exception)
+            {
+            }
         }
 
     }
