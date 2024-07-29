@@ -31,14 +31,16 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             GetLinesSwing(out List<LineCad> swingRights, out List<LineCad> swingLefts);
             SwingRights = swingRights;
             SwingLefts = swingLefts;
-            ElectricColumnSwingsRight = GroupSwing(swingRights, ElectricColumnSwingType.Right);
-            ElectricColumnSwingsLeft = GroupSwing(swingLefts, ElectricColumnSwingType.Left);
+            ElectricColumnSwingsRight = GroupSwing(swingRights, ElectricColumnSwingType.Right, _electricColumnGeneralModel.FacesSubFaceRight);
+            ElectricColumnSwingsLeft = GroupSwing(swingLefts, ElectricColumnSwingType.Left, _electricColumnGeneralModel.FacesSubFaceLeft);
         }
 
         private List<ElectricColumnSwing> GroupSwing(
             List<LineCad> linesSwing,
-            ElectricColumnSwingType electricColumnSwingType)
+            ElectricColumnSwingType electricColumnSwingType,
+            List<FaceCad> faceCads)
         {
+            var pointsVoidOnFace = GetPointOnFace(linesSwing, faceCads);
             var linesSwingNew = linesSwing.Concat(new List<LineCad>()).ToList();
             var results = new List<ElectricColumnSwing>();
             linesSwingNew = linesSwingNew.OrderBy(x => x.MidP.Z).ToList();
@@ -80,6 +82,34 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 }
             }
             return results;
+        }
+
+        private List<Point3d> GetPointOnFace(List<LineCad> lineCads, IEnumerable<FaceCad> faces)
+        {
+            var points = lineCads.GetPoints();
+            var results = new List<Point3d>();
+            try
+            {
+                foreach (var p in points)
+                {
+                    foreach (var f in faces)
+                    {
+                        var fl = f.BaseLine;
+                        var fMax = Math.Max(fl.StartP.Z, fl.EndP.Z);
+                        var fMin = Math.Min(fl.StartP.Z, fl.EndP.Z);
+                        if (p.Z.IsGreateOrEqual(fMin) && p.Z.IsLessOrEqual(fMax))
+                        {
+                            var pray = p.RayPointToFace(f.Normal, f);
+                            if (pray != null)
+                                if (pray.IsSeem(p)) results.Add(p);
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return results.Distinct(new ComparePoints()).ToList();
         }
 
         private List<LineCad> GetChildrents(LineCad parent, List<LineCad> people)

@@ -30,22 +30,42 @@
                 </ZP:BorderZoomPanDrag>
             </Border>
             <StackPanel Grid.Column="1">
-                <ComboBox 
-                    ItemsSource="{Binding ElectricColumnModel.SectionPlanes}"
-                    SelectedValue="{Binding ElectricColumnModel.SectionPlaneSelected}"
-                    DisplayMemberPath="Name"/>
-                <Border BorderBrush="#000" 
-                    BorderThickness="1">
-                    <ZP:BorderZoomPanDrag 
-                        ClipToBounds="True" 
-                        Height="200"
-                        Margin="1"
-                        Background="White">
-                        <Canvas Name="SectionPlaneCanvas"
-                            ClipToBounds="True"
-                            Background="White"/>
-                    </ZP:BorderZoomPanDrag>
-                </Border>
+                <StackPanel>
+                    <ComboBox 
+                        ItemsSource="{Binding ElectricColumnModel.SectionPlanes}"
+                        SelectedValue="{Binding ElectricColumnModel.SectionPlaneSelected}"
+                        DisplayMemberPath="Name"/>
+                    <Border BorderBrush="#000" 
+                        BorderThickness="1">
+                        <ZP:BorderZoomPanDrag 
+                            ClipToBounds="True" 
+                            Height="200"
+                            Margin="1"
+                            Background="White">
+                            <Canvas Name="SectionPlaneCanvas"
+                                ClipToBounds="True"
+                                Background="White"/>
+                        </ZP:BorderZoomPanDrag>
+                    </Border>
+                </StackPanel>
+                <StackPanel Margin="0, 48, 0, 0">
+                    <ComboBox 
+                        ItemsSource="{Binding ElectricColumnModel.SectionPlanes}"
+                        SelectedValue="{Binding ElectricColumnModel.SectionPlaneSelected}"
+                        DisplayMemberPath="Name"/>
+                    <Border BorderBrush="#000" 
+                        BorderThickness="1">
+                        <ZP:BorderZoomPanDrag 
+                            ClipToBounds="True" 
+                            Height="200"
+                            Margin="1"
+                            Background="White">
+                            <Canvas Name="SwingPlaneCanvas"
+                                ClipToBounds="True"
+                                Background="White"/>
+                        </ZP:BorderZoomPanDrag>
+                    </Border>
+                </StackPanel>
             </StackPanel>
         </Grid>
         <StackPanel Margin="0,10,0,0">
