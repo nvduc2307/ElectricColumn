@@ -33,7 +33,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public List<ElectricColumnSectionPlane> SectionPlanes { get; set; }
         public ElectricColumnSectionPlane SectionPlaneSelected
         {
-            get { return _sectionPlaneSelected; } 
+            get { return _sectionPlaneSelected; }
             set
             {
                 _sectionPlaneSelected = value;
@@ -45,6 +45,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 }
             }
         }
+
+        public ElectricColumnSwingModel ElectricColumnSwingModel { get; set; }
 
         public ElectricColumnModel(Transaction ts, Database db, ElectricColumnGeneralViewModel viewModel)
         {
@@ -59,6 +61,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             SectionElevationSub = viewModel.ElectricColumnGeneralModel.LinesSub;
             SectionPlanes = GetSectionPlanes();
             SectionPlaneSelected = SectionPlanes.FirstOrDefault();
+            ElectricColumnSwingModel = viewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel;
         }
 
         public List<ElectricColumnSectionPlane> GetSectionPlanes()
@@ -73,16 +76,16 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             {
                 var dms = allLines
                     .Where(x => Math.Round(x.Dir.Distance(), 0) > 0)
-                    .Where(x=>x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
+                    .Where(x => x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
                     .GroupBy(x => x, new CompareLinesOnPlane())
                     .OrderBy(x => Math.Round(x.First().MidP.Z, 2));
 
                 result = allLines
-                    .Where(x=>Math.Round(x.Dir.Distance(), 0) > 0)
-                    .Where(x=>x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
+                    .Where(x => Math.Round(x.Dir.Distance(), 0) > 0)
+                    .Where(x => x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
                     .GroupBy(x => x, new CompareLinesOnPlane())
-                    .Where(x=>x.Count() >= 2)
-                    .OrderBy(x=>x.First().MidP.Z)
+                    .Where(x => x.Count() >= 2)
+                    .OrderBy(x => x.First().MidP.Z)
                     .Select((x, index) => new ElectricColumnSectionPlane(index, x.ToList()))
                     .ToList();
             }

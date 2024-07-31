@@ -1,13 +1,10 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using CadDev.Utils.CanvasUtils;
+using CadDev.Utils.Compares;
+using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
-using System.Collections.Generic;
-using System;
-using CadDev.Utils.Faces;
 using CadDev.Utils.Messages;
-using CadDev.Utils.Compares;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
@@ -32,8 +29,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public Vector3d VectorMoveMainFace { get; }
         public Vector3d VectorMoveSubFace { get; }
 
-        public Vector3d VectorBaseMain {  get; } // vtX(1, 0, 0)
-        public Vector3d VectorBaseSub {  get; }// vtX(0, 1, 0)
+        public Vector3d VectorBaseMain { get; } // vtX(1, 0, 0)
+        public Vector3d VectorBaseSub { get; }// vtX(0, 1, 0)
 
         public LineCad AxisMainFace { get; set; }
         public LineCad AxisSubFace { get; set; }
@@ -53,7 +50,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
         public List<LineCad> LinesSouth { get; set; }
         public List<LineCad> LinesEarth { get; set; }
-        public List<LineCad> LinesNorth{ get; set; }
+        public List<LineCad> LinesNorth { get; set; }
         public List<LineCad> LinesWest { get; set; }
 
         public ElectricColumnSwingModel ElectricColumnSwingModel { get; set; }
@@ -104,11 +101,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             FacesMainFaceLeft = GetFaces(linesFace2, ElectricColumnFaceType.MainFace);
             FacesSubFaceRight = GetFaces(linesFace11, ElectricColumnFaceType.SubFace);
             FacesSubFaceLeft = GetFaces(linesFace22, ElectricColumnFaceType.SubFace);
-            
+
             ElectricColumnSwingModel = new ElectricColumnSwingModel(this);
             var swings = ElectricColumnSwingModel.SwingRights.Concat(ElectricColumnSwingModel.SwingLefts);
             var linesBodyMain = LinesMain
-                .Where(x => !swings.Any(y=>y.IsSeem(x)))
+                .Where(x => !swings.Any(y => y.IsSeem(x)))
                 .ToList();
 
             LinesSouth = GetLinesBody(linesBodyMain, FacesSubFaceLeft, ElectricColumnFaceType.MainFace);
@@ -122,7 +119,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             var results = new List<LineCad>();
             try
             {
-                var vtRay = electricColumnFaceType == ElectricColumnFaceType.MainFace ? new Vector3d(0,1,0) : new Vector3d(1, 0, 0);
+                var vtRay = electricColumnFaceType == ElectricColumnFaceType.MainFace ? new Vector3d(0, 1, 0) : new Vector3d(1, 0, 0);
                 foreach (var f in faces)
                 {
                     var maxZF = Math.Max(f.BaseLine.StartP.Z, f.BaseLine.EndP.Z);
@@ -152,8 +149,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         private List<FaceCad> GetFaces(List<LineCad> linesFace, ElectricColumnFaceType electricColumnFaceType)
         {
             var norFace = electricColumnFaceType == ElectricColumnFaceType.MainFace
-                ? new Vector3d(0,1,0)
-                : new Vector3d(1,0,0);
+                ? new Vector3d(0, 1, 0)
+                : new Vector3d(1, 0, 0);
             var results = new List<FaceCad>();
             try
             {
@@ -196,8 +193,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 var p11 = new Point3d(p11b.X, p11b.Z, p11b.Y) + vtMove;
                 var p22 = new Point3d(p22b.X, p22b.Z, p22b.Y) + vtMove;
 
-                linesFace1.Add(new LineCad(_ts, _db, 
-                    p1.RotateBy(angle, new Vector3d(0, 0, 1), BasePointInstall), 
+                linesFace1.Add(new LineCad(_ts, _db,
+                    p1.RotateBy(angle, new Vector3d(0, 0, 1), BasePointInstall),
                     p2.RotateBy(angle, new Vector3d(0, 0, 1), BasePointInstall)));
 
                 linesFace2.Add(new LineCad(_ts, _db,

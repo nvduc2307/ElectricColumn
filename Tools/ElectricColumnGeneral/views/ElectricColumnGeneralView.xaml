@@ -50,8 +50,8 @@
                 </StackPanel>
                 <StackPanel Margin="0, 48, 0, 0">
                     <ComboBox 
-                        ItemsSource="{Binding ElectricColumnModel.SectionPlanes}"
-                        SelectedValue="{Binding ElectricColumnModel.SectionPlaneSelected}"
+                        ItemsSource="{Binding ElectricColumnModel.ElectricColumnSwingModel.ElectricColumnTotalSwingsLeft}"
+                        SelectedValue="{Binding ElectricColumnModel.ElectricColumnSwingModel.ElectricColumnSwingSelected}"
                         DisplayMemberPath="Name"/>
                     <Border BorderBrush="#000" 
                         BorderThickness="1">

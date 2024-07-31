@@ -117,6 +117,17 @@ namespace CadDev.Utils.Lines
             return result;
         }
 
+        public static bool IsContinuteLine(this LineCad l1, LineCad l2, List<Point3d> psVoid)
+        {
+            var result = false;
+            var dk1 = l1.StartP.IsSeem(l2.StartP) && !psVoid.Any(x => x.IsSeem(l1.StartP)) || l1.StartP.IsSeem(l2.StartP) && !psVoid.Any(x => x.IsSeem(l1.StartP));
+            var dk2 = l1.EndP.IsSeem(l2.StartP) && !psVoid.Any(x => x.IsSeem(l1.EndP)) || l1.EndP.IsSeem(l2.StartP) && !psVoid.Any(x => x.IsSeem(l1.EndP));
+            var dk3 = l1.StartP.IsSeem(l2.EndP) && !psVoid.Any(x => x.IsSeem(l1.StartP)) || l1.StartP.IsSeem(l2.EndP) && !psVoid.Any(x => x.IsSeem(l1.StartP));
+            var dk4 = l1.EndP.IsSeem(l2.EndP) && !psVoid.Any(x => x.IsSeem(l1.EndP)) || l1.EndP.IsSeem(l2.EndP) && !psVoid.Any(x => x.IsSeem(l1.EndP));
+            if (dk1 || dk2 || dk3 || dk4) result = true;
+            return result;
+        }
+
         public static bool IsSeem(this LineCad l1, LineCad l2)
         {
             return l1.StartP.IsSeem(l2.StartP) && l1.EndP.IsSeem(l2.EndP);

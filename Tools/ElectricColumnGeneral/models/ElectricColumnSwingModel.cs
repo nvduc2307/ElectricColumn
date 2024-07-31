@@ -4,10 +4,11 @@ using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
-    public class ElectricColumnSwingModel
+    public class ElectricColumnSwingModel : ObservableObject
     {
         public Database _db { get; set; }
 
@@ -15,9 +16,24 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
         private ElectricColumnGeneralModel _electricColumnGeneralModel;
 
+        private ElectricColumnSwing _electricColumnSwingSelected;
+
         public IEnumerable<ElectricColumnSwing> ElectricColumnSwingsRight { get; set; }
 
         public IEnumerable<ElectricColumnSwing> ElectricColumnSwingsLeft { get; set; }
+
+        public IEnumerable<ElectricColumnSwing> ElectricColumnTotalSwingsLeft { get; set; }
+
+        public ElectricColumnSwing ElectricColumnSwingSelected
+        {
+            get => _electricColumnSwingSelected;
+            set
+            {
+                _electricColumnSwingSelected = value;
+                OnPropertyChanged();
+                ElectricColumnUIElementModel.UpdateStatusSwingSelectedAtElevation(_viewModel.UIElement.SectionPlaneCanvas, _viewModel);
+            }
+        }
 
         public IEnumerable<LineCad> SwingRights { get; set; }
 
@@ -31,8 +47,17 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             GetLinesSwing(out List<LineCad> swingRights, out List<LineCad> swingLefts);
             SwingRights = swingRights;
             SwingLefts = swingLefts;
-            ElectricColumnSwingsRight = GroupSwing(swingRights, ElectricColumnSwingType.Right, _electricColumnGeneralModel.FacesSubFaceRight);
-            ElectricColumnSwingsLeft = GroupSwing(swingLefts, ElectricColumnSwingType.Left, _electricColumnGeneralModel.FacesSubFaceLeft);
+            ElectricColumnSwingsRight = GroupSwing(swingRights, ElectricColumnSwingType.Right, _electricColumnGeneralModel.FacesMainFaceRight);
+            ElectricColumnSwingsLeft = GroupSwing(swingLefts, ElectricColumnSwingType.Left, _electricColumnGeneralModel.FacesMainFaceLeft);
+
+            ElectricColumnTotalSwingsLeft = ElectricColumnSwingsRight.Concat(ElectricColumnSwingsLeft);
+            var c = 1;
+            foreach (var item in ElectricColumnTotalSwingsLeft)
+            {
+                item.Name = $"Swing{c}";
+                c++;
+            }
+            ElectricColumnSwingSelected = ElectricColumnTotalSwingsLeft.FirstOrDefault();
         }
 
         private List<ElectricColumnSwing> GroupSwing(
@@ -58,7 +83,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                         {
                             family.AddRange(parents);
                             var childrent = parents
-                                .Select(x => GetChildrents(x, linesSwingNew).Where(x => !family.Any(y => y.IsSeem(x))).ToList())
+                                .Select(x => GetChildrents(x, linesSwingNew, pointsVoidOnFace).Where(x => !family.Any(y => y.IsSeem(x))).ToList())
                                 .Where(x => x.Count > 0);
                             var childrentCount = childrent.Count();
                             if (childrentCount > 0)
@@ -112,14 +137,14 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             return results.Distinct(new ComparePoints()).ToList();
         }
 
-        private List<LineCad> GetChildrents(LineCad parent, List<LineCad> people)
+        private List<LineCad> GetChildrents(LineCad parent, List<LineCad> people, List<Point3d> psVoid)
         {
             var results = new List<LineCad>();
             foreach (var person in people)
             {
                 try
                 {
-                    if (parent.IsContinuteLine(person) && !parent.IsSeem(person))
+                    if (parent.IsContinuteLine(person, psVoid) && !parent.IsSeem(person))
                         results.Add(person);
                 }
                 catch (Exception)
@@ -197,6 +222,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         /// </summary>
         private Database _db;
         private Transaction _ts;
+
+        public string Name { get; set; }
         public Vector3d Normal { get; set; }
         public Vector3d Direction { get; set; }
         public FaceCad FaceSwingLeft { get; set; }
@@ -300,6 +327,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             catch (Exception)
             {
             }
+        }
+
+        private void IsActiveInCanvas()
+        {
+
         }
 
     }
