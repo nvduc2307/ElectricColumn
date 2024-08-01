@@ -22,7 +22,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
         public IEnumerable<ElectricColumnSwing> ElectricColumnSwingsLeft { get; set; }
 
-        public IEnumerable<ElectricColumnSwing> ElectricColumnTotalSwingsLeft { get; set; }
+        public IEnumerable<ElectricColumnSwing> ElectricColumnTotalSwings { get; set; }
 
         public ElectricColumnSwing ElectricColumnSwingSelected
         {
@@ -31,7 +31,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             {
                 _electricColumnSwingSelected = value;
                 OnPropertyChanged();
-                ElectricColumnUIElementModel.UpdateStatusSwingSelectedAtElevation(_viewModel.UIElement.SectionPlaneCanvas, _viewModel);
+                if (_electricColumnGeneralModel.UIElement != null)
+                {
+                    ElectricColumnUIElementModel.UpdateStatusSwingSelectedAtElevation(_electricColumnGeneralModel.UIElement.SectionElevationCanvas, _electricColumnGeneralModel);
+                }
             }
         }
 
@@ -50,14 +53,14 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             ElectricColumnSwingsRight = GroupSwing(swingRights, ElectricColumnSwingType.Right, _electricColumnGeneralModel.FacesMainFaceRight);
             ElectricColumnSwingsLeft = GroupSwing(swingLefts, ElectricColumnSwingType.Left, _electricColumnGeneralModel.FacesMainFaceLeft);
 
-            ElectricColumnTotalSwingsLeft = ElectricColumnSwingsRight.Concat(ElectricColumnSwingsLeft);
+            ElectricColumnTotalSwings = ElectricColumnSwingsRight.Concat(ElectricColumnSwingsLeft);
             var c = 1;
-            foreach (var item in ElectricColumnTotalSwingsLeft)
+            foreach (var item in ElectricColumnTotalSwings)
             {
                 item.Name = $"Swing{c}";
                 c++;
             }
-            ElectricColumnSwingSelected = ElectricColumnTotalSwingsLeft.FirstOrDefault();
+            ElectricColumnSwingSelected = ElectricColumnTotalSwings.FirstOrDefault();
         }
 
         private List<ElectricColumnSwing> GroupSwing(

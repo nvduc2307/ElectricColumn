@@ -15,19 +15,19 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
         public void CreateElectricColumn()
         {
             //draw main line
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesSouth)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.LinesSouth)
             {
                 l.Create();
             }
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesEarth)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.LinesEarth)
             {
                 l.Create();
             }
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesNorth)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.LinesNorth)
             {
                 l.Create();
             }
-            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnModel.LinesWest)
+            foreach (var l in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.LinesWest)
             {
                 l.Create();
             }

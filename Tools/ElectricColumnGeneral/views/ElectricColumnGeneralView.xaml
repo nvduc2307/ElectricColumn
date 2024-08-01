@@ -32,8 +32,8 @@
             <StackPanel Grid.Column="1">
                 <StackPanel>
                     <ComboBox 
-                        ItemsSource="{Binding ElectricColumnModel.SectionPlanes}"
-                        SelectedValue="{Binding ElectricColumnModel.SectionPlaneSelected}"
+                        ItemsSource="{Binding ElectricColumnGeneralModel.SectionPlanes}"
+                        SelectedValue="{Binding ElectricColumnGeneralModel.SectionPlaneSelected}"
                         DisplayMemberPath="Name"/>
                     <Border BorderBrush="#000" 
                         BorderThickness="1">
@@ -50,8 +50,8 @@
                 </StackPanel>
                 <StackPanel Margin="0, 48, 0, 0">
                     <ComboBox 
-                        ItemsSource="{Binding ElectricColumnModel.ElectricColumnSwingModel.ElectricColumnTotalSwingsLeft}"
-                        SelectedValue="{Binding ElectricColumnModel.ElectricColumnSwingModel.ElectricColumnSwingSelected}"
+                        ItemsSource="{Binding ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnTotalSwings}"
+                        SelectedValue="{Binding ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingSelected}"
                         DisplayMemberPath="Name"/>
                     <Border BorderBrush="#000" 
                         BorderThickness="1">

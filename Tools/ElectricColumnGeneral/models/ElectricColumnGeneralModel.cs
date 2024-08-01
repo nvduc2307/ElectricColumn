@@ -5,10 +5,11 @@ using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using CadDev.Utils.Messages;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
-    public class ElectricColumnGeneralModel
+    public class ElectricColumnGeneralModel : ObservableObject
     {
         /// <summary>
         /// các tiết diện ban đầu phải được vẽ ở mặt phẳng OXY (chiều OY là hướng chiều cao của cột)
@@ -23,6 +24,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public Transaction _ts { get; set; }
         public Database _db { get; set; }
 
+        private ElectricColumnSectionPlane _sectionPlaneSelected;
+
+        public ElectricColumnUIElementModel UIElement { get; set; }
+
         public Point3d BasePointInstall { get; }
         public Point3d BasePointCurrentMainFace { get; }
         public Point3d BasePointCurrentSubFace { get; }
@@ -35,8 +40,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public LineCad AxisMainFace { get; set; }
         public LineCad AxisSubFace { get; set; }
 
-        public List<LineCad> LinesMain { get; set; }
+        public List<LineCad> LinesMain { get; set; } // bao gom ca swing
+        public List<LineCad> LinesBodyMain { get; set; } // khong bao gom ca swing
         public List<LineCad> LinesSub { get; set; }
+        public List<LineCad> LinesSwing { get; set; }
 
         public List<LineCad> LinesMainFaceRight { get; set; }
         public List<LineCad> LinesMainFaceLeft { get; set; }
@@ -52,6 +59,22 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public List<LineCad> LinesEarth { get; set; }
         public List<LineCad> LinesNorth { get; set; }
         public List<LineCad> LinesWest { get; set; }
+
+        public List<ElectricColumnSectionPlane> SectionPlanes { get; set; }
+        public ElectricColumnSectionPlane SectionPlaneSelected
+        {
+            get { return _sectionPlaneSelected; }
+            set
+            {
+                _sectionPlaneSelected = value;
+                OnPropertyChanged();
+                if (UIElement != null)
+                {
+                    ElectricColumnUIElementModel.DrawSectionPlan(UIElement.SectionPlaneCanvas, this);
+                    ElectricColumnUIElementModel.UpdateStatusSectionSelectedAtElevation(UIElement.SectionElevationCanvas, this);
+                }
+            }
+        }
 
         public ElectricColumnSwingModel ElectricColumnSwingModel { get; set; }
 
@@ -103,15 +126,18 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             FacesSubFaceLeft = GetFaces(linesFace22, ElectricColumnFaceType.SubFace);
 
             ElectricColumnSwingModel = new ElectricColumnSwingModel(this);
-            var swings = ElectricColumnSwingModel.SwingRights.Concat(ElectricColumnSwingModel.SwingLefts);
-            var linesBodyMain = LinesMain
-                .Where(x => !swings.Any(y => y.IsSeem(x)))
+            LinesSwing = ElectricColumnSwingModel.SwingRights.Concat(ElectricColumnSwingModel.SwingLefts).ToList();
+            LinesBodyMain = LinesMain
+                .Where(x => !LinesSwing.Any(y => y.IsSeem(x)))
                 .ToList();
 
-            LinesSouth = GetLinesBody(linesBodyMain, FacesSubFaceLeft, ElectricColumnFaceType.MainFace);
-            LinesNorth = GetLinesBody(linesBodyMain, FacesSubFaceRight, ElectricColumnFaceType.MainFace);
+            LinesSouth = GetLinesBody(LinesBodyMain, FacesSubFaceLeft, ElectricColumnFaceType.MainFace);
+            LinesNorth = GetLinesBody(LinesBodyMain, FacesSubFaceRight, ElectricColumnFaceType.MainFace);
             LinesWest = GetLinesBody(LinesSub, FacesMainFaceLeft, ElectricColumnFaceType.SubFace);
             LinesEarth = GetLinesBody(LinesSub, FacesMainFaceRight, ElectricColumnFaceType.SubFace);
+
+            SectionPlanes = GetSectionPlanes();
+            SectionPlaneSelected = SectionPlanes.FirstOrDefault();
         }
 
         private List<LineCad> GetLinesBody(List<LineCad> lines, List<FaceCad> faces, ElectricColumnFaceType electricColumnFaceType)
@@ -249,6 +275,37 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             catch (Exception)
             {
                 result = new List<LineCad>();
+            }
+            return result;
+        }
+
+        private List<ElectricColumnSectionPlane> GetSectionPlanes()
+        {
+            var result = new List<ElectricColumnSectionPlane>();
+            var allLines = new List<LineCad>();
+            allLines.AddRange(LinesSouth);
+            allLines.AddRange(LinesEarth);
+            allLines.AddRange(LinesNorth);
+            allLines.AddRange(LinesWest);
+            try
+            {
+                var dms = allLines
+                    .Where(x => Math.Round(x.Dir.Distance(), 0) > 0)
+                    .Where(x => x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
+                    .GroupBy(x => x, new CompareLinesOnPlane())
+                    .OrderBy(x => Math.Round(x.First().MidP.Z, 2));
+
+                result = allLines
+                    .Where(x => Math.Round(x.Dir.Distance(), 0) > 0)
+                    .Where(x => x.Dir.DotProduct(Vector3d.ZAxis).IsEqual(0))
+                    .GroupBy(x => x, new CompareLinesOnPlane())
+                    .Where(x => x.Count() >= 2)
+                    .OrderBy(x => x.First().MidP.Z)
+                    .Select((x, index) => new ElectricColumnSectionPlane(index, x.ToList()))
+                    .ToList();
+            }
+            catch (Exception)
+            {
             }
             return result;
         }
