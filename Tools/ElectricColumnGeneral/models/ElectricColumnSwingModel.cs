@@ -4,6 +4,7 @@ using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
+using CadDev.Utils.Points;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
@@ -33,7 +34,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 OnPropertyChanged();
                 if (_electricColumnGeneralModel.UIElement != null)
                 {
-                    ElectricColumnUIElementModel.UpdateStatusSwingSelectedAtElevation(_electricColumnGeneralModel.UIElement.SectionElevationCanvas, _electricColumnGeneralModel);
+                    ElectricColumnUIElementModel.UpdateStatusSwingSelectedAtElevation(_electricColumnGeneralModel);
                 }
             }
         }
@@ -231,9 +232,15 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public Vector3d Direction { get; set; }
         public FaceCad FaceSwingLeft { get; set; }
         public FaceCad FaceSwingRight { get; set; }
+        public FaceCad FaceSwingTop { get; set; }
+        public FaceCad FaceSwingBot { get; set; }
         public List<LineCad> LinesLeft { get; set; }
         public List<LineCad> LinesRight { get; set; }
+        public List<LineCad> LinesTopAdd { get; set; }
+        public List<LineCad> LinesBotAdd { get; set; }
         public IEnumerable<LineCad> LinesSection { get; set; }
+        public IEnumerable<PointCad> PointsSectionBot { get; set; }
+        public IEnumerable<PointCad> PointsSectionTop { get; set; }
         public IEnumerable<FaceCad> FacesSubRight { get; set; }
         public IEnumerable<FaceCad> FacesSubLeft { get; set; }
         public ElectricColumnSwingType ElectricColumnSwingType { get; set; }
@@ -254,7 +261,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 ? Vector3d.XAxis
                 : -Vector3d.XAxis;
             Normal = Vector3d.YAxis;
-            GetFaceSwingRightLeft(out FaceCad faceSwingRight, out FaceCad faceSwingLeft);
+            GetFaceSwingRightLeftTopBot(
+                out FaceCad faceSwingRight, 
+                out FaceCad faceSwingLeft, 
+                out FaceCad faceSwingTop, 
+                out FaceCad faceSwingBot);
             FaceSwingLeft = faceSwingLeft;
             FaceSwingRight = faceSwingRight;
 
@@ -262,14 +273,45 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             LinesLeft = LinesSection.ToList().LinesOnFace(faceSwingLeft, Normal);
         }
 
-        private void GetFaceSwingRightLeft(out FaceCad faceSwingRight, out FaceCad faceSwingLeft)
+        public void GetLinesSwingAtTopBot(
+            List<Point3d> points,
+            Point3d MaxXChop,
+            Point3d MinXTop,
+            Point3d MinXBot,
+            out IEnumerable<LineCad> linesSectionTop,
+            out IEnumerable<LineCad> linesSectionBot)
         {
-            faceSwingRight = null;
-            faceSwingLeft = null;
+            linesSectionTop = new List<LineCad>();
+            linesSectionBot = new List<LineCad>();
             try
             {
-                var points = LinesSection.GetPoints();
-                var pointsGrZ = points.GroupBy(x => x.Z).OrderBy(x => x.FirstOrDefault().Z);
+                // tạo mặt phẳng phía trên, phía dưới
+                //group các linecad nằm phía trên hoặc bên trên bề mặt mặt phẳng phía trên
+                //group các linecad nằm phía dưới hoặc bên trên bề mặt mặt phẳng phía dưới
+                //==> các linecad mặt trên và mặt dưới cần tìm.
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private void GetPointControlOfSwing(
+            out List<Point3d> points,
+            out Point3d MaxXChop, 
+            out Point3d MinXTop,
+            out Point3d MinXBot)
+        {
+            points = new List<Point3d>();
+            MaxXChop = new Point3d();
+            MinXTop = new Point3d();
+            MinXBot = new Point3d();
+            try
+            {
+                points = LinesSection.GetPoints().ToList();
+                var pointsGrZ = points.GroupBy(x => x.Z)
+                    .Select(x => x.ToList())
+                    .OrderBy(x => x.FirstOrDefault().Z)
+                    .ToList();
                 var pointsGrZMax = pointsGrZ.LastOrDefault();
                 var pointsGrZMin = pointsGrZ.FirstOrDefault();
                 var pointsGrX = points.GroupBy(x => (x - new Point3d()).DotProduct(Direction))
@@ -278,19 +320,45 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 var pointsGrMinX = pointsGrX.FirstOrDefault();
 
                 //điểm mũi của cánh
-                var pMaxX = pointsGrMaxX.FirstOrDefault();
+                MaxXChop = pointsGrMaxX.FirstOrDefault();
                 //điểm chân cánh phía trên
-                var pMinXTop = pointsGrZMax
+                MinXTop = pointsGrZMax
                     .GroupBy(x => (x - new Point3d()).DotProduct(Direction))
                     .OrderBy(x => (x.FirstOrDefault() - new Point3d()).DotProduct(Direction))
                     .FirstOrDefault()
                     .FirstOrDefault();
                 //điểm chân cánh phía dưới
-                var pMinXBot = pointsGrZMin
+                MinXBot = pointsGrZMin
                     .GroupBy(x => (x - new Point3d()).DotProduct(Direction))
                     .OrderBy(x => (x.FirstOrDefault() - new Point3d()).DotProduct(Direction))
                     .FirstOrDefault()
                     .FirstOrDefault();
+            }
+            catch (Exception)
+            {
+                MaxXChop = new Point3d();
+                MinXTop = new Point3d();
+                MinXBot = new Point3d();
+            }
+        }
+
+        private void GetFaceSwingRightLeftTopBot(
+            out FaceCad faceSwingRight, 
+            out FaceCad faceSwingLeft, 
+            out FaceCad faceSwingTop, 
+            out FaceCad faceSwingBot)
+        {
+            faceSwingRight = null;
+            faceSwingLeft = null;
+            faceSwingTop = null;
+            faceSwingBot = null;
+            try
+            {
+                GetPointControlOfSwing(
+                out List<Point3d> points,
+                out Point3d pMaxX,
+                out Point3d pMinXTop,
+                out Point3d pMinXBot);
 
                 var pMinXMid = pMinXTop.MidPoint(pMinXBot);
                 var faceSubRightAction = FacesSubRight.FirstOrDefault(x =>
@@ -326,6 +394,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
                 faceSwingRight = new FaceCad(pMaxX, pMinXTopRight, pMinXBotRight);
                 faceSwingLeft = new FaceCad(pMaxX, pMinXTopLeft, pMinXBotLeft);
+                faceSwingTop = new FaceCad(pMaxX, pMinXTopLeft, pMinXBotLeft);
+                faceSwingBot = new FaceCad(pMaxX, pMinXTopLeft, pMinXBotLeft);
             }
             catch (Exception)
             {

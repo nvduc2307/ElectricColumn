@@ -71,7 +71,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 if (UIElement != null)
                 {
                     ElectricColumnUIElementModel.DrawSectionPlan(UIElement.SectionPlaneCanvas, this);
-                    ElectricColumnUIElementModel.UpdateStatusSectionSelectedAtElevation(UIElement.SectionElevationCanvas, this);
+                    ElectricColumnUIElementModel.UpdateStatusSectionSelectedAtElevation(this);
                 }
             }
         }

@@ -44,7 +44,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             }
         }
 
-        public static void UpdateStatusSectionSelectedAtElevation(CanvasBase canvasBase, ElectricColumnGeneralModel electricColumnGeneralModel)
+        public static void UpdateStatusSectionSelectedAtElevation(ElectricColumnGeneralModel electricColumnGeneralModel)
         {
             var sections = electricColumnGeneralModel.SectionPlanes;
             var sectionIndexOf = electricColumnGeneralModel.SectionPlaneSelected;
@@ -62,7 +62,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             }
         }
 
-        public static void UpdateStatusSwingSelectedAtElevation(CanvasBase canvasBase, ElectricColumnGeneralModel electricColumnGeneralModel)
+        public static void UpdateStatusSwingSelectedAtElevation(ElectricColumnGeneralModel electricColumnGeneralModel)
         {
             var swings = electricColumnGeneralModel
                 .ElectricColumnSwingModel
@@ -116,11 +116,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 {
                     var elevation = item.StartP.Z;
                     var section = electricColumnGeneralModel.SectionPlanes.FirstOrDefault(x => x.Elevation.IsEqual(elevation));
-                    if (section != null) section.LinesAtElevation.Add(item);
+                    if (section != null && !swings.Any(x=>x.IsSeem(item))) section.LinesAtElevation.Add(item);
                 }
             }
-            UpdateStatusSwingSelectedAtElevation(canvasBase, electricColumnGeneralModel);
-            UpdateStatusSectionSelectedAtElevation(canvasBase, electricColumnGeneralModel);
+            UpdateStatusSwingSelectedAtElevation(electricColumnGeneralModel);
+            UpdateStatusSectionSelectedAtElevation(electricColumnGeneralModel);
         }
 
         public static void DrawSectionPlan(CanvasBase canvasBase, ElectricColumnGeneralModel electricColumnGeneralModel)
