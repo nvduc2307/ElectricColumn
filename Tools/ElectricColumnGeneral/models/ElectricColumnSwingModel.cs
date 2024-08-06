@@ -4,7 +4,6 @@ using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
-using CadDev.Utils.Points;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
@@ -237,12 +236,16 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public List<LineCad> LinesLeft { get; set; }
         public List<LineCad> LinesRight { get; set; }
         public List<LineCad> LinesTopAdd { get; set; }
+        public List<LineCad> LinesTop { get; set; }
         public List<LineCad> LinesBotAdd { get; set; }
+        public List<LineCad> LinesBot { get; set; }
         public IEnumerable<LineCad> LinesSection { get; set; }
-        public IEnumerable<PointCad> PointsSectionBot { get; set; }
-        public IEnumerable<PointCad> PointsSectionTop { get; set; }
         public IEnumerable<FaceCad> FacesSubRight { get; set; }
         public IEnumerable<FaceCad> FacesSubLeft { get; set; }
+        public IEnumerable<Point3d> Points { get; set; }
+        public Point3d MaxXChop { get; set; }
+        public Point3d MinXTop { get; set; }
+        public Point3d MinXBot { get; set; }
         public ElectricColumnSwingType ElectricColumnSwingType { get; set; }
         public ElectricColumnSwing(
             ElectricColumnGeneralModel electricColumnGeneralModel,
@@ -261,30 +264,87 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 ? Vector3d.XAxis
                 : -Vector3d.XAxis;
             Normal = Vector3d.YAxis;
+
+            GetPointControlOfSwing(
+                out List<Point3d> points,
+                out Point3d maxXChop,
+                out Point3d minXTop,
+                out Point3d minXBot);
+            Points = points;
+            MaxXChop = maxXChop;
+            MinXTop = minXTop;
+            MinXBot = minXBot;
+
+            GetFaceTopBot(MaxXChop, MinXTop, MinXBot,
+            out FaceCad FaceTop,
+            out FaceCad FaceBot);
+            FaceSwingTop = FaceTop;
+            FaceSwingBot = FaceBot;
+
             GetFaceSwingRightLeftTopBot(
-                out FaceCad faceSwingRight, 
-                out FaceCad faceSwingLeft, 
-                out FaceCad faceSwingTop, 
+                out FaceCad faceSwingRight,
+                out FaceCad faceSwingLeft,
+                out FaceCad faceSwingTop,
                 out FaceCad faceSwingBot);
             FaceSwingLeft = faceSwingLeft;
             FaceSwingRight = faceSwingRight;
 
             LinesRight = LinesSection.ToList().LinesOnFace(faceSwingRight, Normal);
             LinesLeft = LinesSection.ToList().LinesOnFace(faceSwingLeft, Normal);
+            LinesTop = GetLinesSwingTopBot(FaceSwingTop, true);
+            LinesBot = GetLinesSwingTopBot(FaceSwingBot, false);
         }
 
-        public void GetLinesSwingAtTopBot(
-            List<Point3d> points,
+        public List<LineCad> GetLinesSwingTopBot(FaceCad faceCad, bool isTopFace = true)
+        {
+            var results = new List<LineCad>();
+            var linesSwingTotal = LinesRight.Concat(LinesLeft).ToList();
+            foreach (var line in linesSwingTotal)
+            {
+                try
+                {
+                    var pSt = line.StartP;
+                    var pEn = line.EndP;
+
+                    var pStRay = pSt.RayPointToFace(faceCad.Normal, faceCad);
+                    var pEnRay = pEn.RayPointToFace(faceCad.Normal, faceCad);
+
+                    if (pStRay != null && pEnRay != null)
+                    {
+                        var vt1 = (pSt - pStRay).GetNormal();
+                        var vt2 = (pEn - pEnRay).GetNormal();
+                        if (isTopFace)
+                        {
+                            if (vt1.DotProduct(Normal).IsGreate(0) && vt2.DotProduct(Normal).IsGreate(0)) results.Add(line);
+                        }
+                        else
+                        {
+                            if (vt1.DotProduct(Normal).IsGreate(0) && vt2.DotProduct(Normal).IsGreate(0)) results.Add(line);
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
+            return results.Distinct(new CompareLines()).ToList();
+        }
+
+        private void GetFaceTopBot(
             Point3d MaxXChop,
             Point3d MinXTop,
             Point3d MinXBot,
-            out IEnumerable<LineCad> linesSectionTop,
-            out IEnumerable<LineCad> linesSectionBot)
+            out FaceCad FaceTop,
+            out FaceCad FaceBot)
         {
-            linesSectionTop = new List<LineCad>();
-            linesSectionBot = new List<LineCad>();
+            FaceTop = null;
+            FaceBot = null;
             try
             {
+                var vtTop = (MaxXChop - MinXTop).GetNormal();
+                var vtBot = (MaxXChop - MinXBot).GetNormal();
+                FaceTop = new FaceCad(vtTop.CrossProduct(Normal).DotProduct(Vector3d.ZAxis).IsGreate(0) ? Normal : -Normal, MinXTop);
+                FaceBot = new FaceCad(vtBot.CrossProduct(Normal).DotProduct(Vector3d.ZAxis).IsGreate(0) ? -Normal : Normal, MinXBot);
                 // tạo mặt phẳng phía trên, phía dưới
                 //group các linecad nằm phía trên hoặc bên trên bề mặt mặt phẳng phía trên
                 //group các linecad nằm phía dưới hoặc bên trên bề mặt mặt phẳng phía dưới
@@ -297,7 +357,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
         private void GetPointControlOfSwing(
             out List<Point3d> points,
-            out Point3d MaxXChop, 
+            out Point3d MaxXChop,
             out Point3d MinXTop,
             out Point3d MinXBot)
         {
@@ -343,9 +403,9 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         }
 
         private void GetFaceSwingRightLeftTopBot(
-            out FaceCad faceSwingRight, 
-            out FaceCad faceSwingLeft, 
-            out FaceCad faceSwingTop, 
+            out FaceCad faceSwingRight,
+            out FaceCad faceSwingLeft,
+            out FaceCad faceSwingTop,
             out FaceCad faceSwingBot)
         {
             faceSwingRight = null;
@@ -354,13 +414,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             faceSwingBot = null;
             try
             {
-                GetPointControlOfSwing(
-                out List<Point3d> points,
-                out Point3d pMaxX,
-                out Point3d pMinXTop,
-                out Point3d pMinXBot);
-
-                var pMinXMid = pMinXTop.MidPoint(pMinXBot);
+                var pMinXMid = MinXTop.MidPoint(MinXBot);
                 var faceSubRightAction = FacesSubRight.FirstOrDefault(x =>
                 {
                     var lb = x.BaseLine;
@@ -381,21 +435,21 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                     return zMin <= pMinXMid.Z && pMinXMid.Z <= zMax;
                 });
 
-                var pMinXBotRight = pMinXBot.RayPointToFace(Normal, faceSubRightAction);
-                var pMinXBotLeft = pMinXBot.RayPointToFace(Normal, faceSubLeftAction);
+                var pMinXBotRight = MinXBot.RayPointToFace(Normal, faceSubRightAction);
+                var pMinXBotLeft = MinXBot.RayPointToFace(Normal, faceSubLeftAction);
 
-                var pMinXTopRight = pMinXTop.RayPointToFace(Normal, faceSubRightAction);
-                var pMinXTopLeft = pMinXTop.RayPointToFace(Normal, faceSubLeftAction);
+                var pMinXTopRight = MinXTop.RayPointToFace(Normal, faceSubRightAction);
+                var pMinXTopLeft = MinXTop.RayPointToFace(Normal, faceSubLeftAction);
 
-                var lBotRight = new LineCad(_ts, _db, pMinXBotRight, pMaxX);
-                var lBotLeft = new LineCad(_ts, _db, pMinXBotLeft, pMaxX);
-                var lTopRight = new LineCad(_ts, _db, pMinXTopRight, pMaxX);
-                var lTopLeft = new LineCad(_ts, _db, pMinXTopLeft, pMaxX);
+                var lBotRight = new LineCad(_ts, _db, pMinXBotRight, MaxXChop);
+                var lBotLeft = new LineCad(_ts, _db, pMinXBotLeft, MaxXChop);
+                var lTopRight = new LineCad(_ts, _db, pMinXTopRight, MaxXChop);
+                var lTopLeft = new LineCad(_ts, _db, pMinXTopLeft, MaxXChop);
 
-                faceSwingRight = new FaceCad(pMaxX, pMinXTopRight, pMinXBotRight);
-                faceSwingLeft = new FaceCad(pMaxX, pMinXTopLeft, pMinXBotLeft);
-                faceSwingTop = new FaceCad(pMaxX, pMinXTopLeft, pMinXBotLeft);
-                faceSwingBot = new FaceCad(pMaxX, pMinXTopLeft, pMinXBotLeft);
+                faceSwingRight = new FaceCad(MaxXChop, pMinXTopRight, pMinXBotRight);
+                faceSwingLeft = new FaceCad(MaxXChop, pMinXTopLeft, pMinXBotLeft);
+                faceSwingTop = new FaceCad(MaxXChop, pMinXTopLeft, pMinXBotLeft);
+                faceSwingBot = new FaceCad(MaxXChop, pMinXTopLeft, pMinXBotLeft);
             }
             catch (Exception)
             {

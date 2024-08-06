@@ -1,5 +1,4 @@
 ﻿using Autodesk.AutoCAD.Geometry;
-using System.Collections;
 
 namespace CadDev.Utils.Compares
 {
@@ -20,7 +19,7 @@ namespace CadDev.Utils.Compares
     {
         public static bool IsSeem(this Point3d x, Point3d y)
         {
-            return x.X.IsEqual(y.X) && x.Y.IsEqual(y.Y) && x.Z.IsEqual(y.Z);
+            return x.X.IsEqual(y.X, 0.1) && x.Y.IsEqual(y.Y, 0.1) && x.Z.IsEqual(y.Z, 0.1);
         }
     }
 }

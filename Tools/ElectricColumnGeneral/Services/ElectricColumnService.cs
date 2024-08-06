@@ -34,11 +34,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
 
             foreach (var electricColumnSwingsLeft in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingsLeft)
             {
-                foreach (var l in electricColumnSwingsLeft.LinesRight)
+                foreach (var l in electricColumnSwingsLeft.LinesTop)
                 {
-                    l.Create();
+                    //l.Create();
                 }
-                foreach (var l in electricColumnSwingsLeft.LinesLeft)
+                foreach (var l in electricColumnSwingsLeft.LinesBot)
                 {
                     l.Create();
                 }
@@ -46,11 +46,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
 
             foreach (var electricColumnSwingsRight in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingsRight)
             {
-                foreach (var l in electricColumnSwingsRight.LinesLeft)
+                foreach (var l in electricColumnSwingsRight.LinesTop)
                 {
-                    l.Create();
+                    //l.Create();
                 }
-                foreach (var l in electricColumnSwingsRight.LinesRight)
+                foreach (var l in electricColumnSwingsRight.LinesBot)
                 {
                     l.Create();
                 }
