@@ -53,18 +53,42 @@
                         ItemsSource="{Binding ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnTotalSwings}"
                         SelectedValue="{Binding ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingSelected}"
                         DisplayMemberPath="Name"/>
-                    <Border BorderBrush="#000" 
-                        BorderThickness="1">
-                        <ZP:BorderZoomPanDrag 
-                            ClipToBounds="True" 
-                            Height="200"
-                            Margin="1"
-                            Background="White">
-                            <Canvas Name="SwingPlaneCanvas"
-                                ClipToBounds="True"
-                                Background="White"/>
-                        </ZP:BorderZoomPanDrag>
-                    </Border>
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <Border BorderBrush="#000" 
+                                        BorderThickness="1">
+                                    <ZP:BorderZoomPanDrag 
+                                        ClipToBounds="True" 
+                                        Height="200"
+                                        Margin="1"
+                                        Background="White">
+                                        <Canvas Name="SwingPlaneCanvasTop"
+                                            ClipToBounds="True"
+                                            Background="White"/>
+                                    </ZP:BorderZoomPanDrag>
+                                </Border>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <Border BorderBrush="#000" 
+                                        BorderThickness="1">
+                                    <ZP:BorderZoomPanDrag 
+                                        ClipToBounds="True" 
+                                        Height="200"
+                                        Margin="1"
+                                        Background="White">
+                                        <Canvas Name="SwingPlaneCanvasBot"
+                                        ClipToBounds="True"
+                                        Background="White"/>
+                                    </ZP:BorderZoomPanDrag>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
         </Grid>

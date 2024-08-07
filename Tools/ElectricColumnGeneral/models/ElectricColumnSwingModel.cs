@@ -4,6 +4,7 @@ using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
+using CadDev.Utils.Points;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
@@ -34,6 +35,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 if (_electricColumnGeneralModel.UIElement != null)
                 {
                     ElectricColumnUIElementModel.UpdateStatusSwingSelectedAtElevation(_electricColumnGeneralModel);
+                    ElectricColumnUIElementModel.DrawSwingTop(_electricColumnGeneralModel.UIElement.SwingPlaneTopCanvas, _electricColumnGeneralModel);
+                    ElectricColumnUIElementModel.DrawSwingBot(_electricColumnGeneralModel.UIElement.SwingPlaneBotCanvas, _electricColumnGeneralModel);
                 }
             }
         }
@@ -239,6 +242,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public List<LineCad> LinesTop { get; set; }
         public List<LineCad> LinesBotAdd { get; set; }
         public List<LineCad> LinesBot { get; set; }
+        public List<PointCad> PointsTop { get; set; }
+        public List<PointCad> PointsBot { get; set; }
         public IEnumerable<LineCad> LinesSection { get; set; }
         public IEnumerable<FaceCad> FacesSubRight { get; set; }
         public IEnumerable<FaceCad> FacesSubLeft { get; set; }
@@ -246,6 +251,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public Point3d MaxXChop { get; set; }
         public Point3d MinXTop { get; set; }
         public Point3d MinXBot { get; set; }
+        public Point3d Center { get; set; }
         public ElectricColumnSwingType ElectricColumnSwingType { get; set; }
         public ElectricColumnSwing(
             ElectricColumnGeneralModel electricColumnGeneralModel,
@@ -256,6 +262,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         {
             _ts = linesSection.FirstOrDefault()._ts;
             _db = linesSection.FirstOrDefault()._db;
+            LinesTopAdd = new List<LineCad>();
+            LinesBotAdd = new List<LineCad>();
             LinesSection = linesSection;
             FacesSubRight = facesSubRight;
             FacesSubLeft = facesSubLeft;
@@ -293,6 +301,38 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             LinesLeft = LinesSection.ToList().LinesOnFace(faceSwingLeft, Normal);
             LinesTop = GetLinesSwingTopBot(FaceSwingTop, true);
             LinesBot = GetLinesSwingTopBot(FaceSwingBot, false);
+
+            Center = GetCenter();
+            PointsTop = LinesTop.GetPoints().Select(x => new PointCad(x)).ToList();
+            PointsBot = LinesBot.GetPoints().Select(x => new PointCad(x)).ToList();
+        }
+
+        private Point3d GetCenter()
+        {
+            var result = new Point3d();
+            try
+            {
+                var ps = Points.Select(x => new Point3d(x.X, x.Y, 0)).ToList();
+                var psX = ps
+                    .GroupBy(x => (x - new Point3d()).DotProduct(Direction))
+                    .OrderBy(x => (x.FirstOrDefault() - new Point3d()).DotProduct(Direction))
+                    .ToList();
+                var psY = ps
+                    .GroupBy(x => (x - new Point3d()).DotProduct(Normal))
+                    .OrderBy(x => (x.FirstOrDefault() - new Point3d()).DotProduct(Normal))
+                    .ToList();
+
+                var pXmin = psX.FirstOrDefault().FirstOrDefault();
+                var pXmax = psX.FirstOrDefault().LastOrDefault();
+                var pYmin = psY.FirstOrDefault().LastOrDefault();
+                var pYmax = psY.FirstOrDefault().LastOrDefault();
+
+                result = pXmax.MidPoint(pYmin);
+            }
+            catch (Exception)
+            {
+            }
+            return result;
         }
 
         public List<LineCad> GetLinesSwingTopBot(FaceCad faceCad, bool isTopFace = true)
@@ -306,8 +346,8 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                     var pSt = line.StartP;
                     var pEn = line.EndP;
 
-                    var pStRay = pSt.RayPointToFace(faceCad.Normal, faceCad);
-                    var pEnRay = pEn.RayPointToFace(faceCad.Normal, faceCad);
+                    var pStRay = pSt.RayPointToFace(Vector3d.ZAxis, faceCad);
+                    var pEnRay = pEn.RayPointToFace(Vector3d.ZAxis, faceCad);
 
                     if (pStRay != null && pEnRay != null)
                     {
@@ -315,11 +355,11 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                         var vt2 = (pEn - pEnRay).GetNormal();
                         if (isTopFace)
                         {
-                            if (vt1.DotProduct(Normal).IsGreate(0) && vt2.DotProduct(Normal).IsGreate(0)) results.Add(line);
+                            if (pSt.Z.IsGreateOrEqual(pStRay.Z) && pEn.Z.IsGreateOrEqual(pEnRay.Z)) results.Add(line);
                         }
                         else
                         {
-                            if (vt1.DotProduct(Normal).IsGreate(0) && vt2.DotProduct(Normal).IsGreate(0)) results.Add(line);
+                            if (pSt.Z.IsLessOrEqual(pStRay.Z) && pEn.Z.IsLessOrEqual(pEnRay.Z)) results.Add(line);
                         }
                     }
                 }
@@ -343,8 +383,12 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             {
                 var vtTop = (MaxXChop - MinXTop).GetNormal();
                 var vtBot = (MaxXChop - MinXBot).GetNormal();
-                FaceTop = new FaceCad(vtTop.CrossProduct(Normal).DotProduct(Vector3d.ZAxis).IsGreate(0) ? Normal : -Normal, MinXTop);
-                FaceBot = new FaceCad(vtBot.CrossProduct(Normal).DotProduct(Vector3d.ZAxis).IsGreate(0) ? -Normal : Normal, MinXBot);
+                FaceTop = new FaceCad(vtTop.CrossProduct(Normal).DotProduct(Vector3d.ZAxis).IsGreate(0)
+                    ? vtTop.CrossProduct(Normal)
+                    : -vtTop.CrossProduct(Normal), MinXTop);
+                FaceBot = new FaceCad(vtBot.CrossProduct(Normal).DotProduct(Vector3d.ZAxis).IsGreate(0)
+                    ? -vtBot.CrossProduct(Normal)
+                    : vtBot.CrossProduct(Normal), MinXBot);
                 // tạo mặt phẳng phía trên, phía dưới
                 //group các linecad nằm phía trên hoặc bên trên bề mặt mặt phẳng phía trên
                 //group các linecad nằm phía dưới hoặc bên trên bề mặt mặt phẳng phía dưới

@@ -34,11 +34,19 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
 
             foreach (var electricColumnSwingsLeft in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingsLeft)
             {
-                foreach (var l in electricColumnSwingsLeft.LinesTop)
+                foreach (var l in electricColumnSwingsLeft.LinesRight)
                 {
-                    //l.Create();
+                    l.Create();
                 }
-                foreach (var l in electricColumnSwingsLeft.LinesBot)
+                foreach (var l in electricColumnSwingsLeft.LinesLeft)
+                {
+                    l.Create();
+                }
+                foreach (var l in electricColumnSwingsLeft.LinesTopAdd)
+                {
+                    l.Create();
+                }
+                foreach (var l in electricColumnSwingsLeft.LinesBotAdd)
                 {
                     l.Create();
                 }
@@ -46,11 +54,19 @@ namespace CadDev.Tools.ElectricColumnGeneral.services
 
             foreach (var electricColumnSwingsRight in ElectricColumnGeneralViewModel.ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingsRight)
             {
-                foreach (var l in electricColumnSwingsRight.LinesTop)
+                foreach (var l in electricColumnSwingsRight.LinesRight)
                 {
-                    //l.Create();
+                    l.Create();
                 }
-                foreach (var l in electricColumnSwingsRight.LinesBot)
+                foreach (var l in electricColumnSwingsRight.LinesLeft)
+                {
+                    l.Create();
+                }
+                foreach (var l in electricColumnSwingsRight.LinesTopAdd)
+                {
+                    l.Create();
+                }
+                foreach (var l in electricColumnSwingsRight.LinesBotAdd)
                 {
                     l.Create();
                 }
