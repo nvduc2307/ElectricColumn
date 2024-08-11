@@ -151,6 +151,31 @@ namespace CadDev.Utils.Lines
             }
             return results;
         }
+        public static List<LineCad> LinesOnFace(this List<LineCad> lines, IEnumerable<FaceCad> faceCads, Vector3d vtRay)
+        {
+            var results = new List<LineCad>();
+            foreach (var l in lines)
+            {
+                foreach (var face in faceCads)
+                {
+                    try
+                    {
+                        var fmaxZ = Math.Max(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z); 
+                        var fminZ = Math.Min(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z);
+                        if (l.MidP.Z.IsGreateOrEqual(fminZ, 0.1) && l.MidP.Z.IsLessOrEqual(fmaxZ, 0.1)) {
+                            var p1 = l.StartP.RayPointToFace(vtRay, face);
+                            var p2 = l.EndP.RayPointToFace(vtRay, face);
+                            var lc = new LineCad(l._ts, l._db, p1, p2);
+                            results.Add(lc);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+            }
+            return results.Distinct(new CompareLines()).ToList();
+        }
     }
     public class LineCad
     {

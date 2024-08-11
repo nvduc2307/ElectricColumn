@@ -41,16 +41,16 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 var swingPlaneCanvasBotName = MainView.FindName(_swingPlaneCanvasBotName) as Canvas;
                 SectionElevationCanvas = new CanvasBase(sectionElevationCanvas, 0.008);
                 SectionPlaneCanvas = new CanvasBase(sectionPlaneCanvas, 0.008);
-                SwingPlaneTopCanvas = new CanvasBase(swingPlaneCanvasTopName, 0.01);
-                SwingPlaneBotCanvas = new CanvasBase(swingPlaneCanvasBotName, 0.01);
+                SwingPlaneTopCanvas = new CanvasBase(swingPlaneCanvasTopName, 0.005);
+                SwingPlaneBotCanvas = new CanvasBase(swingPlaneCanvasBotName, 0.005);
                 DrawingSectionElevation(SectionElevationCanvas, _viewModel.ElectricColumnGeneralModel);
                 DrawSectionPlan(SectionPlaneCanvas, _viewModel.ElectricColumnGeneralModel);
                 DrawSwingTop(SwingPlaneTopCanvas, _viewModel.ElectricColumnGeneralModel);
                 DrawSwingBot(SwingPlaneBotCanvas, _viewModel.ElectricColumnGeneralModel);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                //throw ex;
             }
         }
 
@@ -74,21 +74,24 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
 
         public static void UpdateStatusSwingSelectedAtElevation(ElectricColumnGeneralModel electricColumnGeneralModel)
         {
-            var swings = electricColumnGeneralModel
-                .ElectricColumnSwingModel
-                .ElectricColumnTotalSwings
-                .Select(x => x.LinesSection)
-                .Aggregate((a, b) => a.Concat(b))
-                .ToList();
-            var sectionIndexOf = electricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingSelected;
-            foreach (var lc in swings)
+            if (electricColumnGeneralModel.ElectricColumnSwingModel != null)
             {
-                lc.CanvasLine.ResetStatus();
-            }
+                var swings = electricColumnGeneralModel
+                    .ElectricColumnSwingModel
+                    .ElectricColumnTotalSwings
+                    .Select(x => x.LinesSection)
+                    .Aggregate((a, b) => a.Concat(b))
+                    .ToList();
+                var sectionIndexOf = electricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingSelected;
+                foreach (var lc in swings)
+                {
+                    lc.CanvasLine.ResetStatus();
+                }
 
-            foreach (var lc in sectionIndexOf.LinesSection)
-            {
-                lc.CanvasLine.SelectedStatus();
+                foreach (var lc in sectionIndexOf.LinesSection)
+                {
+                    lc.CanvasLine.SelectedStatus();
+                }
             }
         }
 
@@ -183,7 +186,6 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
                 item.InstanceInCanvasCircel.DrawInCanvas();
             }
         }
-
         public static void DrawSwingTop(CanvasBase canvasBase, ElectricColumnGeneralModel electricColumnGeneralModel)
         {
             var options = new OptionStyleInstanceInCanvas(

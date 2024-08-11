@@ -4,8 +4,10 @@ using CadDev.Utils.Compares;
 using CadDev.Utils.Faces;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
+using CadDev.Utils.Lists;
 using CadDev.Utils.Points;
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace CadDev.Tools.ElectricColumnGeneral.models
 {
@@ -221,14 +223,25 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         }
 
     }
-    public class ElectricColumnSwing
+    public class ElectricColumnSwing : ObservableObject
     {
         /// <summary>
         /// cac line canh tren mat cat.
         /// </summary>
         private Database _db;
         private Transaction _ts;
-
+        private ElectricColumnGeneralModel _electricColumnGeneralModel;
+        private int _typeShape;
+        public int TypeShape {
+            get => _typeShape;
+            set
+            {
+                _typeShape = value;
+                OnPropertyChanged();
+                GenerateLinesRightLeft(_typeShape);
+                GenerateLinesTopBot(_typeShape);
+            }
+        }
         public string Name { get; set; }
         public Vector3d Normal { get; set; }
         public Vector3d Direction { get; set; }
@@ -237,13 +250,25 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public FaceCad FaceSwingTop { get; set; }
         public FaceCad FaceSwingBot { get; set; }
         public List<LineCad> LinesLeft { get; set; }
+        public List<LineCad> LinesLeftType1 { get; set; }
+        public List<LineCad> LinesLeftType2 { get; set; }
         public List<LineCad> LinesRight { get; set; }
-        public List<LineCad> LinesTopAdd { get; set; }
+        public List<LineCad> LinesRightType1 { get; set; }
+        public List<LineCad> LinesRightType2 { get; set; }
         public List<LineCad> LinesTop { get; set; }
-        public List<LineCad> LinesBotAdd { get; set; }
+        public List<LineCad> LinesTopType1 { get; set; }
+        public List<LineCad> LinesTopType2 { get; set; }
+        public List<LineCad> LinesTopAdd { get; set; }
         public List<LineCad> LinesBot { get; set; }
+        public List<LineCad> LinesBotType1 { get; set; }
+        public List<LineCad> LinesBotType2 { get; set; }
+        public List<LineCad> LinesBotAdd { get; set; }
         public List<PointCad> PointsTop { get; set; }
+        public List<PointCad> PointsTop1 { get; set; }
+        public List<PointCad> PointsTop2 { get; set; }
         public List<PointCad> PointsBot { get; set; }
+        public List<PointCad> PointsBot1 { get; set; }
+        public List<PointCad> PointsBot2 { get; set; }
         public IEnumerable<LineCad> LinesSection { get; set; }
         public IEnumerable<FaceCad> FacesSubRight { get; set; }
         public IEnumerable<FaceCad> FacesSubLeft { get; set; }
@@ -262,6 +287,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         {
             _ts = linesSection.FirstOrDefault()._ts;
             _db = linesSection.FirstOrDefault()._db;
+            _electricColumnGeneralModel = electricColumnGeneralModel;
             LinesTopAdd = new List<LineCad>();
             LinesBotAdd = new List<LineCad>();
             LinesSection = linesSection;
@@ -282,6 +308,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             MaxXChop = maxXChop;
             MinXTop = minXTop;
             MinXBot = minXBot;
+            Center = GetCenter();
 
             GetFaceTopBot(MaxXChop, MinXTop, MinXBot,
             out FaceCad FaceTop,
@@ -297,14 +324,74 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             FaceSwingLeft = faceSwingLeft;
             FaceSwingRight = faceSwingRight;
 
-            LinesRight = LinesSection.ToList().LinesOnFace(faceSwingRight, Normal);
-            LinesLeft = LinesSection.ToList().LinesOnFace(faceSwingLeft, Normal);
-            LinesTop = GetLinesSwingTopBot(FaceSwingTop, true);
-            LinesBot = GetLinesSwingTopBot(FaceSwingBot, false);
+            LinesRightType1 = LinesSection.ToList().LinesOnFace(faceSwingRight, Normal);
+            LinesLeftType1 = LinesSection.ToList().LinesOnFace(faceSwingLeft, Normal);
+            LinesRightType2 = LinesSection.ToList().LinesOnFace(FacesSubRight, Normal);
+            LinesLeftType2 = LinesSection.ToList().LinesOnFace(FacesSubLeft, Normal);
+            
+            LinesRight = LinesRightType1;
+            LinesLeft = LinesLeftType1;
 
-            Center = GetCenter();
-            PointsTop = LinesTop.GetPoints().Select(x => new PointCad(x)).ToList();
-            PointsBot = LinesBot.GetPoints().Select(x => new PointCad(x)).ToList();
+            LinesTopType1 = GetLinesSwingTopBot(FaceSwingTop, LinesRightType1, LinesLeftType1, true);
+            LinesBotType1 = GetLinesSwingTopBot(FaceSwingBot, LinesRightType1, LinesLeftType1, false);
+            LinesTopType2 = GetLinesSwingTopBot(FaceSwingTop, LinesRightType2, LinesLeftType2, true);
+            LinesBotType2 = GetLinesSwingTopBot(FaceSwingBot, LinesRightType2, LinesLeftType2, false);
+
+            LinesTop = LinesTopType1;
+            LinesBot = LinesBotType1;
+
+            PointsTop1 = LinesTopType1.GetPoints().Select(x => new PointCad(x)).ToList();
+            PointsBot1 = LinesBotType1.GetPoints().Select(x => new PointCad(x)).ToList();
+            PointsTop2 = LinesTopType2.GetPoints().Select(x => new PointCad(x)).ToList();
+            PointsBot2 = LinesBotType2.GetPoints().Select(x => new PointCad(x)).ToList();
+
+            PointsTop = PointsTop1;
+            PointsBot = PointsBot1;
+
+            TypeShape = 0;
+        }
+
+        private void GenerateLinesRightLeft(int typeShape)
+        {
+            switch (typeShape)
+            {
+                case (int)ElectricColumnSwingTypeShape.Type1:
+                    LinesRight = LinesRightType1;
+                    LinesLeft = LinesLeftType1;
+                    break;
+                case (int)ElectricColumnSwingTypeShape.Type2:
+                    LinesRight = LinesRightType2;
+                    LinesLeft = LinesLeftType2;
+                    break;
+            }
+            OnPropertyChanged(nameof(LinesRight));
+            OnPropertyChanged(nameof(LinesLeft));
+        }
+        private void GenerateLinesTopBot(int typeShape)
+        {
+            LinesTopAdd = new List<LineCad>();
+            LinesBotAdd = new List<LineCad>();
+            switch (typeShape)
+            {
+                case (int)ElectricColumnSwingTypeShape.Type1:
+                    LinesTop = LinesTopType1;
+                    LinesBot = LinesBotType1;
+                    PointsTop = PointsTop1;
+                    PointsBot = PointsBot1;
+                    break;
+                case (int)ElectricColumnSwingTypeShape.Type2:
+                    LinesTop = LinesTopType2;
+                    LinesBot = LinesBotType2;
+                    PointsTop = PointsTop2;
+                    PointsBot = PointsBot2;
+                    break;
+            }
+            if (_electricColumnGeneralModel.ElectricColumnSwingModel != null)
+            {
+                ElectricColumnUIElementModel.UpdateStatusSwingSelectedAtElevation(_electricColumnGeneralModel);
+                ElectricColumnUIElementModel.DrawSwingTop(_electricColumnGeneralModel.UIElement.SwingPlaneTopCanvas, _electricColumnGeneralModel);
+                ElectricColumnUIElementModel.DrawSwingBot(_electricColumnGeneralModel.UIElement.SwingPlaneBotCanvas,_electricColumnGeneralModel);
+            }
         }
 
         private Point3d GetCenter()
@@ -335,10 +422,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
             return result;
         }
 
-        public List<LineCad> GetLinesSwingTopBot(FaceCad faceCad, bool isTopFace = true)
+        public List<LineCad> GetLinesSwingTopBot(FaceCad faceCad, List<LineCad> linesRight, List<LineCad> linesLeft, bool isTopFace = true)
         {
             var results = new List<LineCad>();
-            var linesSwingTotal = LinesRight.Concat(LinesLeft).ToList();
+            var linesSwingTotal = linesRight.Concat(linesLeft).ToList();
             foreach (var line in linesSwingTotal)
             {
                 try
@@ -510,5 +597,10 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
     {
         Right = 1,
         Left = 2,
+    }
+    public enum ElectricColumnSwingTypeShape
+    {
+        Type1 = 0,
+        Type2 = 1,
     }
 }

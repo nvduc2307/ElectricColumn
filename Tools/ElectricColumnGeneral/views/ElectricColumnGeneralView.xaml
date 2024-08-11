@@ -53,6 +53,11 @@
                         ItemsSource="{Binding ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnTotalSwings}"
                         SelectedValue="{Binding ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingSelected}"
                         DisplayMemberPath="Name"/>
+                    <ComboBox Margin="0,5,0,0" HorizontalAlignment="Left" Width="70" SelectedIndex="{Binding ElectricColumnGeneralModel.ElectricColumnSwingModel.ElectricColumnSwingSelected.TypeShape}">
+                        <ComboBoxItem Content="Type1"/>
+                        <ComboBoxItem Content="Type2"/>
+                        <ComboBoxItem/>
+                    </ComboBox>
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -60,11 +65,12 @@
                                 <ColumnDefinition/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
+                                <TextBlock Text="Top Plane"/>
                                 <Border BorderBrush="#000" 
                                         BorderThickness="1">
                                     <ZP:BorderZoomPanDrag 
                                         ClipToBounds="True" 
-                                        Height="200"
+                                        Height="157"
                                         Margin="1"
                                         Background="White">
                                         <Canvas Name="SwingPlaneCanvasTop"
@@ -74,11 +80,12 @@
                                 </Border>
                             </StackPanel>
                             <StackPanel Grid.Column="1">
+                                <TextBlock Text="Bot Plane"/>
                                 <Border BorderBrush="#000" 
                                         BorderThickness="1">
                                     <ZP:BorderZoomPanDrag 
                                         ClipToBounds="True" 
-                                        Height="200"
+                                        Height="157"
                                         Margin="1"
                                         Background="White">
                                         <Canvas Name="SwingPlaneCanvasBot"
