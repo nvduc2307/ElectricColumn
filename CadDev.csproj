@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<UseWPF>true</UseWPF>
 		<LangVersion>preview</LangVersion>
@@ -39,7 +39,7 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<Version>$(CADVersion)</Version>
-		<!--<GenerateAssemblyInfo>true</GenerateAssemblyInfo>-->
+		<GenerateAssemblyInfo>true</GenerateAssemblyInfo>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<Description>A Project Support for developer in Autocad And Civild3D </Description>
 		<PublishSingleFile>true</PublishSingleFile>
