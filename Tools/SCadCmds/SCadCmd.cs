@@ -28,7 +28,7 @@ namespace CadDev.Tools.SCadCmds
         private double _spacing = 200;
         private String _blockTag = "CHU_THICH";
 
-        [CommandMethod("SCadDevMarkChange")]
+        [CommandMethod("SCad_Dev_MarkChange")]
         public void Execute()
         {
             try
@@ -87,7 +87,7 @@ namespace CadDev.Tools.SCadCmds
 
     public class SCadDevCreateMidLineFromTwoLineCmd : ICadCommand
     {
-        [CommandMethod("SCadDevCreateMidLineFromTwoLine")]
+        [CommandMethod("SCad_Dev_CreateMidLine_FromTwoLine")]
         public void Execute()
         {
             try
@@ -141,7 +141,7 @@ namespace CadDev.Tools.SCadCmds
 
     public class SCadDevDimensionLineForPolygonCmd
     {
-        [CommandMethod("SCadDevDimensionLineForPolygon")]
+        [CommandMethod("SCad_Dev_DimensionLine_ForPolygon")]
         public void Execute()
         {
             try
