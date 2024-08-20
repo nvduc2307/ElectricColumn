@@ -160,9 +160,10 @@ namespace CadDev.Utils.Lines
                 {
                     try
                     {
-                        var fmaxZ = Math.Max(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z); 
+                        var fmaxZ = Math.Max(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z);
                         var fminZ = Math.Min(face.BaseLine.StartP.Z, face.BaseLine.EndP.Z);
-                        if (l.MidP.Z.IsGreateOrEqual(fminZ, 0.1) && l.MidP.Z.IsLessOrEqual(fmaxZ, 0.1)) {
+                        if (l.MidP.Z.IsGreateOrEqual(fminZ, 0.1) && l.MidP.Z.IsLessOrEqual(fmaxZ, 0.1))
+                        {
                             var p1 = l.StartP.RayPointToFace(vtRay, face);
                             var p2 = l.EndP.RayPointToFace(vtRay, face);
                             var lc = new LineCad(l._ts, l._db, p1, p2);
@@ -175,6 +176,18 @@ namespace CadDev.Utils.Lines
                 }
             }
             return results.Distinct(new CompareLines()).ToList();
+        }
+
+        public static Point3d GetMid(this Line l)
+        {
+            try
+            {
+                return l.StartPoint.MidPoint(l.EndPoint);
+            }
+            catch (Exception)
+            {
+                return new Point3d();
+            }
         }
     }
     public class LineCad

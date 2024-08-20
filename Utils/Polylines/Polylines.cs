@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using CadDev.Utils.Geometries;
 
 namespace CadDev.Utils.Polylines
 {
@@ -45,7 +46,7 @@ namespace CadDev.Utils.Polylines
                 var Cp = polyline.NumberOfVertices;
                 for (int i = 0; i < Cp; i++)
                 {
-                   var p = polyline.GetPoint3dAt(i);
+                    var p = polyline.GetPoint3dAt(i);
                     results.Add(p);
                 }
             }
@@ -53,6 +54,29 @@ namespace CadDev.Utils.Polylines
             {
             }
             return results;
+        }
+
+        public static Point3d GetCenter(this Polyline polyline)
+        {
+            var result = new Point3d();
+            try
+            {
+                var points = polyline.GetPoints();
+                var minx = points.Min(x => x.X);
+                var miny = points.Min(x => x.Y);
+                var minz = points.Min(x => x.Z);
+                var maxx = points.Max(x => x.X);
+                var maxy = points.Max(x => x.Y);
+                var maxz = points.Max(x => x.Z);
+                var p1 = new Point3d(minx, miny, minz);
+                var p2 = new Point3d(maxx, maxy, maxz);
+                result = p1.MidPoint(p2);
+            }
+            catch (Exception)
+            {
+                result = new Point3d();
+            }
+            return result;
         }
     }
 }

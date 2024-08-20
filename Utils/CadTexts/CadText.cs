@@ -1,10 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CadDev.Utils.CadTexts
 {
@@ -13,6 +8,7 @@ namespace CadDev.Utils.CadTexts
     }
     public static class CadTextExt
     {
+        private static double _textHeight = 2.5;
         public static DBText CreateText(this Transaction ts, Database db, Point3d position = new Point3d(), string content = "content")
         {
             DBText result = null;
@@ -25,6 +21,7 @@ namespace CadDev.Utils.CadTexts
                 result = new DBText();
                 result.TextString = content;
                 result.Position = position;
+                //result.Height = _textHeight * db.Cannoscale.Scale;
                 result.SetDatabaseDefaults();
                 acBlkTblRec.AppendEntity(result);
                 ts.AddNewlyCreatedDBObject(result, true);
@@ -33,6 +30,23 @@ namespace CadDev.Utils.CadTexts
             {
             }
             return result;
+        }
+        public static void EditHeightText(this Transaction ts, Database db, DBText dBText, double heightText = 2.5)
+        {
+            try
+            {
+                BlockTable acBlkTbl;
+                acBlkTbl = ts.GetObject(db.BlockTableId, OpenMode.ForWrite) as BlockTable;
+                BlockTableRecord acBlkTblRec;
+                acBlkTblRec = ts.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
+                dBText.Height = heightText / db.Cannoscale.Scale;
+                dBText.SetDatabaseDefaults();
+                acBlkTblRec.AppendEntity(dBText);
+                ts.AddNewlyCreatedDBObject(dBText, true);
+            }
+            catch (Exception)
+            {
+            }
         }
         public static void EditText(this Transaction ts, Database db, DBText dBText, string contentChange = null)
         {

@@ -100,9 +100,6 @@
 		<PackageReference Include="Mono.Cecil" Version="0.11.4" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Utils\Dimentions\" />
-	</ItemGroup>
-	<ItemGroup>
 	  <EmbeddedResource Update="Properties\Resources.resx">
 	    <Generator>ResXFileCodeGenerator</Generator>
 	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
