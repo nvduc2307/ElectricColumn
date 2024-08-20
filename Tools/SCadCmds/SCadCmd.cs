@@ -1,11 +1,12 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadDev.Extension.ICommand;
 using CadDev.Tools.ElectricColumnGeneral.exceptions;
 using CadDev.Utils;
 using CadDev.Utils.CadBlocks;
-using CadDev.Utils.CadTexts;
+using CadDev.Utils.CadDimentions;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using CadDev.Utils.Messages;
@@ -19,7 +20,7 @@ namespace CadDev.Tools.SCadCmds
 
     }
 
-    public class SCadDMCCmd : ICadCommand
+    public class SCadDevMarkChangeCmd : ICadCommand
     {
         private string _phi = "%%c";
         private string _markOrigin = "%%c12a200 L=";
@@ -27,7 +28,7 @@ namespace CadDev.Tools.SCadCmds
         private double _spacing = 200;
         private String _blockTag = "CHU_THICH";
 
-        [CommandMethod("dmlq")]
+        [CommandMethod("SCadDevMarkChange")]
         public void Execute()
         {
             try
@@ -86,119 +87,9 @@ namespace CadDev.Tools.SCadCmds
         }
     }
 
-    public class SCadDMLCmd : ICadCommand
+    public class SCadDevCreateMidLineFromTwoLineCmd : ICadCommand
     {
-        private string _phi = "%%c";
-        private string _markOrigin = "%%c12a200 L=";
-        private string _mark = "xx_%%c12a200 L=_value";
-        private double _textHeight = 2.5;
-
-        [CommandMethod("dml")]
-        public void Execute()
-        {
-            try
-            {
-                AC.GetInfomation();
-                using (Transaction ts = AC.Database.TransactionManager.StartTransaction())
-                {
-                    try
-                    {
-                        using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
-                        {
-                            Polyline rPl = null;
-                            Line rl = null;
-                            var objR = ts.PickObject(AC.Editor, "Pick rebar (PolyLine)");
-                            if (objR != null)
-                            {
-                                if (objR is Polyline) rPl = objR as Polyline;
-                                if (objR is Line) rl = objR as Line;
-                            }
-                            if (rPl != null)
-                            {
-                                var length = Math.Round(rPl.Length, 0);
-                                var position = rPl.GetCenter();
-                                var contentChange = $"{_markOrigin}{length}";
-                                var text = ts.CreateText(AC.Database, position, contentChange);
-                                ts.EditHeightText(AC.Database, text);
-                            }
-
-                            if (rl != null)
-                            {
-                                var length = Math.Round(rl.Length, 0);
-                                var position = rl.GetMid();
-                                var contentChange = $"{_markOrigin}{length}";
-                                var text = ts.CreateText(AC.Database, position, contentChange);
-                                ts.EditHeightText(AC.Database, text);
-                            }
-                        }
-                        ts.Commit();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        if (ex.Message != ObjectNotFoundException.MessageError) IO.ShowWarning("Đối tượng đã chọn không phù hợp");
-                    }
-                }
-            }
-            catch (System.Exception)
-            {
-            }
-        }
-    }
-
-    public class SCadDMQCmd : ICadCommand
-    {
-        private string _phi = "%%c";
-        private string _markOrigin = "%%c12a200 L=";
-        private string _mark = "xx_%%c12a200 L=_value";
-        private double _spacing = 200;
-
-        [CommandMethod("dmq")]
-        public void Execute()
-        {
-            try
-            {
-                AC.GetInfomation();
-                using (Transaction ts = AC.Database.TransactionManager.StartTransaction())
-                {
-                    try
-                    {
-                        using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
-                        {
-                            Dimension d = null;
-                            var objD = ts.PickObject(AC.Editor, "Pick Dim");
-                            if (objD != null && objD is Dimension) d = objD as Dimension;
-
-                            DBText text = null;
-                            var objtext = ts.PickObject(AC.Editor, "Pick Text");
-                            if (objtext != null && objtext is DBText) text = objtext as DBText;
-
-                            if (text != null && d != null)
-                            {
-                                var dL = d.Measurement;
-                                var du = dL % _spacing;
-                                var qtyOdd = 1 + (dL - du) / 200;
-                                var qty = du * 100 / _spacing >= 50 ? qtyOdd + 1 : qtyOdd;
-                                var contentChange = $"{qty}{text.TextString}";
-                                ts.EditText(AC.Database, text, contentChange);
-                            }
-                        }
-                        ts.Commit();
-                    }
-                    catch (System.Exception ex)
-                    {
-                        if (ex.Message != ObjectNotFoundException.MessageError) IO.ShowWarning("Đối tượng đã chọn không phù hợp");
-                    }
-                }
-            }
-            catch (System.Exception)
-            {
-            }
-        }
-    }
-
-    public class SCadDDCmd : ICadCommand
-    {
-        [CommandMethod("dcl")]
+        [CommandMethod("SCadDevCreateMidLineFromTwoLine")]
         public void Execute()
         {
             try
@@ -250,9 +141,9 @@ namespace CadDev.Tools.SCadCmds
         }
     }
 
-    public class SCadBlockCmd : ICadCommand
+    public class SCadDevDimensionLineForPolygonCmd
     {
-        [CommandMethod("readBlock")]
+        [CommandMethod("SCadDevDimensionLineForPolygon")]
         public void Execute()
         {
             try
@@ -264,12 +155,29 @@ namespace CadDev.Tools.SCadCmds
                     {
                         using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
                         {
-                            BlockReference blockRef = null;
-                            var objL1 = ts.PickObject(AC.Editor, "Pick BlockReference");
-                            if (objL1 != null && objL1 is BlockReference) blockRef = objL1 as BlockReference;
+                            Polyline pll = null;
+                            var objL1 = ts.PickObject(AC.Editor, "Pick Line1");
+                            if (objL1 != null && objL1 is Polyline) pll = objL1 as Polyline;
 
-                            ts.EditBlock(AC.Database, blockRef, "CHU_THICH", "PHUONG");
-
+                            if (objL1 != null)
+                            {
+                                if (objL1 is Polyline || objL1 is Line)
+                                {
+                                    var points = new List<Point3d>();
+                                    var rLength = 0.0;
+                                    if (objL1 is Polyline pl) points = pl.GetPoints();
+                                    if (objL1 is Line l) points = l.GetPoints().ToList();
+                                    var pointsCount = points.Count;
+                                    for (int i = 1; i < pointsCount; i++)
+                                    {
+                                        var j = i - 1;
+                                        var p1 = points[j];
+                                        var p2 = points[i];
+                                        var pMid = p1.MidPoint(p2);
+                                        ts.CreateDim(AC.Database, p1, p2, pMid);
+                                    }
+                                }
+                            }
                         }
                         ts.Commit();
                     }
