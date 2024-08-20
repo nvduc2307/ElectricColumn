@@ -41,8 +41,6 @@ namespace CadDev.Tools.SCadCmds
                         using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
                         {
 
-                            Polyline rPl = null;
-                            Line rl = null;
                             var objR = ts.PickObject(AC.Editor, "Pick rebar (PolyLine)");
 
                             Dimension d = null;
@@ -164,7 +162,6 @@ namespace CadDev.Tools.SCadCmds
                                 if (objL1 is Polyline || objL1 is Line)
                                 {
                                     var points = new List<Point3d>();
-                                    var rLength = 0.0;
                                     if (objL1 is Polyline pl) points = pl.GetPoints();
                                     if (objL1 is Line l) points = l.GetPoints().ToList();
                                     var pointsCount = points.Count;
