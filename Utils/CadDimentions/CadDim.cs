@@ -32,5 +32,22 @@ namespace CadDev.Utils.CadDimentions
             }
             return result;
         }
+
+        public static void OverWriteTextDim(this Transaction ts, Database db, Dimension dim, string textOverWrite = " ")
+        {
+            try
+            {
+                BlockTable acBlkTbl;
+                acBlkTbl = ts.GetObject(db.BlockTableId, OpenMode.ForWrite) as BlockTable;
+                BlockTableRecord acBlkTblRec;
+                acBlkTblRec = ts.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
+                dim.DimensionText = textOverWrite;
+                acBlkTblRec.AppendEntity(dim);
+                ts.AddNewlyCreatedDBObject(dim, true);
+            }
+            catch (Exception)
+            {
+            }
+        }
     }
 }

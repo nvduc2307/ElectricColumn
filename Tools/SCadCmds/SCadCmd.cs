@@ -20,6 +20,44 @@ namespace CadDev.Tools.SCadCmds
 
     }
 
+    public class ScadDevRemoveTextDimCmd : ICadCommand
+    {
+        [CommandMethod("Scad_Dev_RemoveTextDim")]
+        public void Execute()
+        {
+            try
+            {
+                AC.GetInfomation();
+                using (Transaction ts = AC.Database.TransactionManager.StartTransaction())
+                {
+                    try
+                    {
+                        using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
+                        {
+
+                            Dimension d = null;
+                            var objD = ts.PickObject(AC.Editor, "Pick Dim");
+                            if (objD != null && objD is Dimension) d = objD as Dimension;
+
+                            if (d != null)
+                            {
+                                ts.OverWriteTextDim(AC.Database, d);
+                            }
+                            ts.Commit();
+                        }
+                    }
+                    catch (System.Exception ex)
+                    {
+                        if (ex.Message != ObjectNotFoundException.MessageError) IO.ShowWarning("Đối tượng đã chọn không phù hợp");
+                    }
+                }
+            }
+            catch (System.Exception)
+            {
+            }
+        }
+    }
+
     public class SCadDevMarkChangeCmd : ICadCommand
     {
         private string _phi = "%%c";
