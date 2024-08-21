@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using CadDev.Extension.ICommand;
@@ -7,6 +8,7 @@ using CadDev.Tools.ElectricColumnGeneral.exceptions;
 using CadDev.Utils;
 using CadDev.Utils.CadBlocks;
 using CadDev.Utils.CadDimentions;
+using CadDev.Utils.Cads;
 using CadDev.Utils.Geometries;
 using CadDev.Utils.Lines;
 using CadDev.Utils.Messages;
@@ -15,9 +17,42 @@ using CadDev.Utils.Selections;
 
 namespace CadDev.Tools.SCadCmds
 {
-    public class SCadCmd
+    public class SCadCmd : ICadCommand
     {
-
+        [CommandMethod("Scad_Dev_CreateFileCad")]
+        public void Execute()
+        {
+            try
+            {
+                var saveDialog = new SaveFileDialog();
+                saveDialog.Filter = "|.dwg";
+                saveDialog.InitialDirectory = "C:\\";
+                saveDialog.FileName = "index";
+                var dialogResult = saveDialog.ShowDialog();
+                if (dialogResult == DialogResult.OK)
+                {
+                    var path = saveDialog.FileName;
+                    CadExt.CreateNewFileCad(path);
+                    var docCadnew = CadExt.OpenDocumentCad(path);
+                    var edittor = docCadnew.Editor;
+                    var database = docCadnew.Database;
+                    using (var ts = database.TransactionManager.StartTransaction())
+                    {
+                        using (DocumentLock documentLock = docCadnew.LockDocument())
+                        {
+                            var lCad = new LineCad(ts, database, new Point3d(), new Point3d(1000, 0, 0));
+                            lCad._db = database;
+                            lCad.Create();
+                        }
+                        ts.Commit();
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                IO.ShowException(ex);
+            }
+        }
     }
 
     public class ScadDevRemoveTextDimCmd : ICadCommand
@@ -60,11 +95,9 @@ namespace CadDev.Tools.SCadCmds
 
     public class SCadDevMarkChangeCmd : ICadCommand
     {
-        private string _phi = "%%c";
-        private string _markOrigin = "%%c12a200 L=";
-        private string _mark = "xx_%%c12a200 L=_value";
-        private double _spacing = 200;
         private String _blockTag = "CHU_THICH";
+        public static double Diameter { get; set; } = 12;
+        public static double Spacing { get; set; } = 200;
 
         [CommandMethod("SCad_Dev_MarkChange")]
         public void Execute()
@@ -76,17 +109,33 @@ namespace CadDev.Tools.SCadCmds
                 {
                     try
                     {
+                        var keyWorks = new List<string>()
+                        {
+                            RebarProperties.Diameter.ToString(),
+                            RebarProperties.Spacing.ToString(),
+                        };
+                        var options = new PromptSelectionOptions();
+                        foreach (var item in keyWorks)
+                        {
+                            options.Keywords.Add(item);
+                        }
+                        options.KeywordInput += Options_KeywordInput;
                         using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
                         {
-
-                            var objR = ts.PickObject(AC.Editor, "Pick rebar (PolyLine)");
+                            var messR = $"Pick rebar (PolyLine) or choose an option [Diameter, Spacing]:";
+                            options.MessageForAdding = messR;
+                            var objR = ts.PickObject(AC.Editor, options);
 
                             Dimension d = null;
-                            var objD = ts.PickObject(AC.Editor, "Pick Dim");
+                            var messD = $"Pick Dim or choose an option [Diameter, Spacing]:";
+                            options.MessageForAdding = messR;
+                            var objD = ts.PickObject(AC.Editor, options);
                             if (objD != null && objD is Dimension) d = objD as Dimension;
 
                             BlockReference blockRef = null;
-                            var objL1 = ts.PickObject(AC.Editor, "Pick BlockReference");
+                            var messBRef = $"Pick BlockReference an option [Diameter, Spacing]:";
+                            options.MessageForAdding = messR;
+                            var objL1 = ts.PickObject(AC.Editor, options);
                             if (objL1 != null && objL1 is BlockReference) blockRef = objL1 as BlockReference;
 
 
@@ -100,11 +149,11 @@ namespace CadDev.Tools.SCadCmds
                                     if (objR is Line l) rLength = Math.Round(l.Length, 0);
                                     //Get rebar quantity
                                     var dL = d.Measurement;
-                                    var du = dL % _spacing;
-                                    var qtyOdd = 1 + (dL - du) / _spacing;
-                                    var qty = du * 100 / _spacing >= 50 ? qtyOdd + 1 : qtyOdd;
+                                    var du = dL % Spacing;
+                                    var qtyOdd = 1 + (dL - du) / Spacing;
+                                    var qty = du * 100 / Spacing >= 50 ? qtyOdd + 1 : qtyOdd;
                                     //Change content in block
-                                    var contentChange = $"{qty}{_markOrigin}{rLength}";
+                                    var contentChange = $"{qty}%%c{Diameter}a{Spacing} L={rLength}";
                                     ts.EditBlock(AC.Database, blockRef, _blockTag, contentChange);
                                 }
                             }
@@ -120,6 +169,52 @@ namespace CadDev.Tools.SCadCmds
             catch (System.Exception)
             {
             }
+        }
+
+        private void Options_KeywordInput(object sender, SelectionTextInputEventArgs e)
+        {
+            var optionDouble = new PromptDoubleOptions(e.Input);
+            var rebarPro = GetRebarProperties(e.Input);
+            // Handle the keyword input
+            switch (rebarPro)
+            {
+                case RebarProperties.Diameter:
+                    var diameterResult = AC.Editor.GetDouble(optionDouble);
+                    Diameter = diameterResult.Value;
+                    break;
+                case RebarProperties.Spacing:
+                    var spacingResult = AC.Editor.GetDouble(optionDouble);
+                    Spacing = spacingResult.Value;
+                    break;
+            }
+        }
+
+        private RebarProperties GetRebarProperties(string content)
+        {
+            var result = RebarProperties.Diameter;
+            try
+            {
+                switch (content)
+                {
+                    case "Diameter":
+                        result = RebarProperties.Diameter;
+                        break;
+                    case "Spacing":
+                        result = RebarProperties.Spacing;
+                        break;
+                }
+            }
+            catch (System.Exception)
+            {
+
+            }
+            return result;
+        }
+
+        private enum RebarProperties
+        {
+            Diameter = 0,
+            Spacing = 1,
         }
     }
 

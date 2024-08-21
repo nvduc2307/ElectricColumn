@@ -114,6 +114,35 @@ namespace CadDev.Utils.Selections
             return element;
         }
 
+        public static Entity PickObject(this Transaction ts, Editor editor, PromptSelectionOptions options)
+        {
+            Entity element = null;
+            try
+            {
+                ObjectId selection;
+                PromptSelectionResult result = editor.GetSelection(options);
+                if (result.Status == PromptStatus.OK)
+                {
+                    selection = result.Value.GetObjectIds().FirstOrDefault();
+                }
+                else
+                {
+                    editor.WriteMessage("\n Selection failure.");
+                    selection = ObjectId.Null;
+                }
+                if (selection != ObjectId.Null)
+                {
+                    element = ts.GetObject(selection, OpenMode.ForWrite) as Entity;
+                }
+            }
+            catch (ObjectNotFoundException ex)
+            {
+                throw ex;
+            }
+            if (element == null) throw new ObjectNotFoundException();
+            return element;
+        }
+
         public static Point3d PickPoint(this Editor editor, string promptMessage = "Pick point")
         {
             var promptPoint = editor.GetPoint(promptMessage);

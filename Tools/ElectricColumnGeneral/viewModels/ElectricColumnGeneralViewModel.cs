@@ -32,5 +32,16 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
         {
             UIElement.MainView.Close();
         }
+        [RelayCommand]
+        public void CreateDrawing()
+        {
+            var saveDialog = new SaveFileDialog();
+            var dialogResult = saveDialog.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+                var path = saveDialog.FileName;
+                //CadExt.CreateNewFileCad();
+            }
+        }
     }
 }

@@ -222,7 +222,7 @@ namespace CadDev.Utils.Lines
                 BlockTableRecord acBlkTblRec;
                 acBlkTblRec = _ts.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
                 result = new Line(StartP, EndP);
-                result.SetDatabaseDefaults();
+                result.SetDatabaseDefaults(_db);
                 acBlkTblRec.AppendEntity(result);
                 _ts.AddNewlyCreatedDBObject(result, true);
             }

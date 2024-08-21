@@ -5,7 +5,6 @@ using CadDev.Extension.ICommand;
 using CadDev.Tools.ElectricColumnGeneral.exceptions;
 using CadDev.Tools.ElectricColumnGeneral.models;
 using CadDev.Tools.ElectricColumnGeneral.viewModels;
-using CadDev.Tools.ElectricColumnGeneral.views;
 using CadDev.Utils;
 using CadDev.Utils.Messages;
 using CadDev.Utils.Selections;
@@ -16,7 +15,7 @@ namespace CadDev.Tools.ElectricColumnGeneral
     {
         private ElectricColumnGeneralRuleInstallViewModel _ruleInstall;
         private ElectricColumnGeneralViewModel _electricColumnGeneralViewModel;
-        [CommandMethod("22")]
+        [CommandMethod("DesignElectric")]
         public void Execute()
         {
             try
