@@ -6,7 +6,7 @@ namespace CadDev.Utils.Polylines
 {
     public static class Polylines
     {
-        public static Polyline CreatePolyline(this Transaction ts, Database database, IEnumerable<Point2d> ps)
+        public static Polyline CreatePolyline(this Transaction ts, Database database, IEnumerable<Point3d> ps)
         {
             Polyline result = null;
             try
@@ -23,9 +23,10 @@ namespace CadDev.Utils.Polylines
                 result = new Polyline();
                 result.SetDatabaseDefaults();
                 var c = 0;
-                foreach (Point2d p in ps)
+                foreach (Point3d p in ps)
                 {
-                    result.AddVertexAt(c, p, 0, 0, 0);
+                    var p2d = new Point2d(p.X, p.Y);
+                    result.AddVertexAt(c, p2d, 0, 0, 0);
                     c++;
                 }
                 // Add the new object to the block table record and the transaction

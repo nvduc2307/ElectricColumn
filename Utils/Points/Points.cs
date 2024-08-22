@@ -1,20 +1,33 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using CadDev.Tools.ElectricColumnGeneral.viewModels;
+﻿using Autodesk.AutoCAD.Geometry;
 using CadDev.Utils.CanvasUtils;
-using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace CadDev.Utils.Points
 {
     public static class Points
     {
+        public static double GetDistance(this List<Point3d> points)
+        {
+            var pCount = points.Count;
+            var result = 0.0;
+            try
+            {
+                for (global::System.Int32 i = 1; i < pCount; i++)
+                {
+                    var j = i - 1;
+                    result += points[j].DistanceTo(points[i]);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return result;
+        }
     }
     public class PointCad
     {
-        public object Obj {  get; set; }
+        public object Obj { get; set; }
         public Point3d P { get; set; }
-        public InstanceInCanvasCircel InstanceInCanvasCircel {  get; set; }
+        public InstanceInCanvasCircel InstanceInCanvasCircel { get; set; }
         public Action<object> Action { get; set; }
         public bool IsSelected { get; set; }
         public PointCad(Point3d p)
