@@ -9,6 +9,7 @@ using CadDev.Utils;
 using CadDev.Utils.CadBlocks;
 using CadDev.Utils.CadDimentions;
 using CadDev.Utils.Cads;
+using CadDev.Utils.CadTexts;
 using CadDev.Utils.Compares;
 using CadDev.Utils.ElementTransform;
 using CadDev.Utils.Geometries;
@@ -535,6 +536,60 @@ namespace CadDev.Tools.SCadCmds
                                         var pMid = p1.MidPoint(p2);
                                         ts.CreateDim(AC.Database, p1, p2, pMid);
                                     }
+                                }
+                            }
+                        }
+                        ts.Commit();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        if (ex.Message != ObjectNotFoundException.MessageError) IO.ShowWarning("Đối tượng đã chọn không phù hợp");
+                    }
+                }
+            }
+            catch (System.Exception)
+            {
+            }
+        }
+    }
+
+    public class SCadDevRebarLengthCmd
+    {
+        [CommandMethod("SCad_Dev_Rebar_Length")]
+        public void Execute()
+        {
+            try
+            {
+                AC.GetInfomation();
+                using (Transaction ts = AC.Database.TransactionManager.StartTransaction())
+                {
+                    try
+                    {
+                        using (DocumentLock documentLock = AC.DocumentCollection.MdiActiveDocument.LockDocument())
+                        {
+                            Polyline pll = null;
+                            var objL1 = ts.PickObject(AC.Editor, "Pick Line1");
+                            if (objL1 != null && objL1 is Polyline) pll = objL1 as Polyline;
+
+                            if (objL1 != null)
+                            {
+                                if (objL1 is Polyline || objL1 is Line)
+                                {
+                                    //Get rebar length
+                                    var rLength = 0.0;
+                                    var rCenter = new Point3d();
+                                    if (objL1 is Polyline pl)
+                                    {
+                                        rLength = Math.Round(pl.Length, 0);
+                                        rCenter = pl.GetCenter();
+                                    }
+                                    if (objL1 is Line l)
+                                    {
+                                        rLength = Math.Round(l.Length, 0);
+                                        rCenter = l.GetMid();
+                                    }
+                                    var text = ts.CreateText(AC.Database, rCenter, rLength.ToString());
+                                    ts.EditHeightText(AC.Database, text);
                                 }
                             }
                         }
