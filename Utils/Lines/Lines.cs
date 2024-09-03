@@ -192,6 +192,7 @@ namespace CadDev.Utils.Lines
     }
     public class LineCad
     {
+        public int Id { get; set; }
         public Transaction _ts { get; set; }
         public Database _db { get; set; }
         public Point3d EndP { get; set; }

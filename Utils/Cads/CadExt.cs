@@ -8,19 +8,19 @@ namespace CadDev.Utils.Cads
     {
         public static string CreateNewFileCad(string path)
         {
+            Document result = null;
             try
             {
                 DocumentCollection acDocMgr = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager;
-                Document acDoc = acDocMgr.Add(Process.GetCurrentProcess().MainModule.FileName);
-                acDoc.Database.SaveAs(path, true, DwgVersion.Current,
-                              acDoc.Database.SecurityParameters);
-                acDoc.CloseAndDiscard();
-                return path;
+                result = acDocMgr.Add(Process.GetCurrentProcess().MainModule.FileName);
+                result.Database.SaveAs(path, true, DwgVersion.Current,
+                              result.Database.SecurityParameters);
+                result.CloseAndDiscard();
             }
             catch (Exception)
             {
-                return string.Empty;
             }
+            return path;
         }
 
         public static Document OpenDocumentCad(string path)
