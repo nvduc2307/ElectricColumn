@@ -1,9 +1,12 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using CadDev.Tools.ElectricColumnGeneral.exceptions;
 using CadDev.Tools.ElectricColumnGeneral.models;
 using CadDev.Tools.ElectricColumnGeneral.services;
 using CadDev.Utils.Cads;
+using CadDev.Utils.CadTexts;
+using CadDev.Utils.ElementTransform;
 using CadDev.Utils.Messages;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -96,6 +99,30 @@ namespace CadDev.Tools.ElectricColumnGeneral.viewModels
                                 ElectricColumnGeneralModel.LinesWest,
                                 ElectricColumnGeneralModel.SectionPlanes,
                                 ElectricColumnGeneralModel.ElectricColumnSwingModel);
+
+                            foreach (var item in electricColumnGeneralPlan.LinesMainFacesOnPlan)
+                            {
+                                item.Line.Create();
+                                var text = ts.CreateText(databaseNew);
+                                ts.EditHeightText(databaseNew, text, 500);
+                            }
+                            foreach (var item in electricColumnGeneralPlan.LinesSubFacesOnPlan)
+                            {
+                                item.Line.Create();
+                                var text = ts.CreateText(databaseNew);
+                                ts.EditHeightText(databaseNew, text, 500);
+                            }
+
+                            var c = 0;
+                            foreach (var section in electricColumnGeneralPlan.SectionPlanes)
+                            {
+                                foreach (var item in section.LinesOnSection)
+                                {
+                                    var l = item.Line.Create();
+                                    l.Move(Vector3d.XAxis * electricColumnGeneralPlan.WidthBoxMainBody * c);
+                                }
+                                c++;
+                            }
 
                             UIElement.MainView.Focus();
                         }

@@ -13,6 +13,7 @@ namespace CadDev.Tools.ElectricColumnGeneral.models
         public List<LineCad> Lines { get; set; }
         public List<LineCad> LinesAdd { get; set; }
         public List<LineCad> LinesAtElevation { get; set; }
+        public List<LineInPlan> LinesOnSection { get; set; }
         public double Elevation { get; set; }
         public List<PointCad> Points { get; set; }
         public Point3d Center { get; set; }
